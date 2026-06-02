@@ -21,7 +21,7 @@ export function useJobSocket(
     if (!assignmentId) return
 
     const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'wss://vedaai-backend-6s8j.onrender.com/ws'
-    const ws = new WebSocket(`${WS_URL}/ws`)
+    const ws = new WebSocket(`${WS_URL}`)
     wsRef.current = ws
 
     ws.onopen = () => {

@@ -1,130 +1,152 @@
 'use client'
-import { Wand2, Sparkles, FileText, BarChart2, Brain, MessageSquare, PenTool, Zap } from 'lucide-react'
+import React from 'react'
+import {
+  Sparkles, FileText, BarChart2, Brain, MessageSquare,
+  PenTool, Zap, ArrowRight, Lock, Wand2
+} from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
+import Link from 'next/link'
 
 const tools = [
   {
-    icon: 'Sparkles',
+    icon: Sparkles,
     label: 'AI Question Generator',
-    desc: 'Auto-generate high-quality questions from any topic, chapter, or uploaded document.',
-    color: 'bg-orange-50 text-orange-500',
-    badge: 'Active',
-    badgeColor: 'bg-green-50 text-green-600',
+    desc: 'Generate complete question papers with sections, marks distribution, and answer keys from any topic or uploaded document.',
+    badge: 'Live',
+    href: '/assignments/create',
   },
   {
-    icon: 'FileText',
+    icon: FileText,
     label: 'Rubric Builder',
-    desc: 'Create detailed marking rubrics and grading criteria with AI assistance.',
-    color: 'bg-blue-50 text-blue-500',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-gray-100 text-gray-500',
+    desc: 'Create detailed marking rubrics and grading criteria with AI assistance tailored to your curriculum.',
+    badge: 'Soon',
+    href: null,
   },
   {
-    icon: 'BarChart2',
+    icon: BarChart2,
     label: 'Grade Analyzer',
-    desc: 'Analyze student performance trends and automatically identify learning gaps.',
-    color: 'bg-purple-50 text-purple-500',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-gray-100 text-gray-500',
+    desc: 'Analyze student performance trends and automatically identify learning gaps across your class.',
+    badge: 'Soon',
+    href: null,
   },
   {
-    icon: 'Brain',
+    icon: Brain,
     label: 'Lesson Planner',
-    desc: 'Generate structured lesson plans aligned with your curriculum and learning objectives.',
-    color: 'bg-green-50 text-green-500',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-gray-100 text-gray-500',
+    desc: 'Generate structured lesson plans aligned with your curriculum objectives and teaching goals.',
+    badge: 'Soon',
+    href: null,
   },
   {
-    icon: 'MessageSquare',
+    icon: MessageSquare,
     label: 'Student Feedback AI',
     desc: 'Generate personalized, constructive feedback for each student submission automatically.',
-    color: 'bg-pink-50 text-pink-500',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-gray-100 text-gray-500',
+    badge: 'Soon',
+    href: null,
   },
   {
-    icon: 'PenTool',
+    icon: PenTool,
     label: 'Essay Evaluator',
-    desc: 'AI-powered evaluation of long-form answers with detailed scoring and comments.',
-    color: 'bg-yellow-50 text-yellow-600',
-    badge: 'Coming Soon',
-    badgeColor: 'bg-gray-100 text-gray-500',
+    desc: 'AI-powered evaluation of long-form answers with detailed scoring and inline comments.',
+    badge: 'Soon',
+    href: null,
   },
-]
-
-const iconMap: Record<string, React.ElementType> = {
-  Sparkles, FileText, BarChart2, Brain, MessageSquare, PenTool
-}
-
-const stats = [
-  { label: 'Tools Available', value: '6', icon: Zap },
-  { label: 'AI Generations', value: '24', icon: Sparkles },
-  { label: 'Hours Saved', value: '12', icon: Brain },
 ]
 
 export default function ToolkitPage() {
   return (
-    <div className="flex flex-col h-full">
-      <Topbar label="AI Teacher's Toolkit" />
-      <div className="flex-1 p-6 overflow-auto">
+    <>
+      <Topbar title="AI Toolkit" />
+      <div className="page-body">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-green-400" />
-              <h1 className="font-bold text-base text-gray-900">AI Teacher's Toolkit</h1>
-            </div>
-            <p className="text-xs text-gray-500 ml-4">Powerful AI tools to supercharge your teaching workflow.</p>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+          <div className="page-header" style={{ marginBottom: 0 }}>
+            <h1 className="page-title">AI Teacher's Toolkit</h1>
+            <p className="page-desc">Powerful AI tools to supercharge your teaching workflow</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {stats.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="card p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
-                <Icon size={18} className="text-orange-500" />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+          {[
+            { label: 'Tools Available', value: '6', sub: '1 active now' },
+            { label: 'AI Generations', value: '24+', sub: 'All time' },
+            { label: 'Time Saved', value: '12h+', sub: 'Estimated' },
+          ].map(({ label, value, sub }, i) => (
+            <div key={label} className="card animate-fade-up" style={{ padding: '20px 24px', animationDelay: `${i * 50}ms` }}>
+              <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1, marginBottom: 6 }}>
+                {value}
               </div>
-              <div>
-                <p className="text-xl font-bold text-gray-900">{value}</p>
-                <p className="text-xs text-gray-500">{label}</p>
-              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>{label}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>{sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Tool Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tools.map(({ icon, label, desc, color, badge, badgeColor }) => {
-            const Icon = iconMap[icon]
-            const isActive = badge === 'Active'
-            return (
+        {/* Featured active tool */}
+        <div style={{ marginBottom: 24 }}>
+          <div className="section-title">Active</div>
+          <Link
+            href="/assignments/create"
+            className="card-hover"
+            style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '24px 28px', textDecoration: 'none' }}
+          >
+            <div style={{ width: 48, height: 48, borderRadius: 10, background: 'var(--text-1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Sparkles size={20} style={{ color: 'white' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)' }}>AI Question Generator</span>
+                <span className="pill pill-success" style={{ fontSize: 10 }}>
+                  <span className="dot dot-success" style={{ width: 5, height: 5 }} />
+                  Live
+                </span>
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5 }}>
+                Generate complete question papers with sections, marks, and answer keys. Upload a PDF for topic-specific output.
+              </p>
+            </div>
+            <ArrowRight size={18} style={{ color: 'var(--text-4)', flexShrink: 0 }} />
+          </Link>
+        </div>
+
+        {/* Coming soon grid */}
+        <div>
+          <div className="section-title">Coming Soon</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            {tools.filter(t => !t.href).map(({ icon: Icon, label, desc }, i) => (
               <div
                 key={label}
-                className={`card p-5 transition-shadow ${isActive ? 'hover:shadow-md cursor-pointer' : 'opacity-70 cursor-not-allowed'}`}
+                className="card animate-fade-up"
+                style={{ padding: '20px 24px', opacity: 0.55, animationDelay: `${i * 40}ms` }}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center`}>
-                    <Icon size={18} />
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={16} style={{ color: 'var(--text-3)' }} />
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>
-                    {badge}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 7px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 4 }}>
+                    <Lock size={9} style={{ color: 'var(--text-4)' }} />
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-4)' }}>Coming soon</span>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-sm text-gray-900 mb-2">{label}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
-                {isActive && (
-                  <button className="mt-4 text-xs font-medium text-orange-600 hover:text-orange-700 transition-colors">
-                    Open Tool →
-                  </button>
-                )}
+                <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)', marginBottom: 6 }}>{label}</h3>
+                <p style={{ fontSize: 12, color: 'var(--text-4)', lineHeight: 1.6 }}>{desc}</p>
               </div>
-            )
-          })}
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="card" style={{ marginTop: 24, padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-2)' }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', marginBottom: 2 }}>More tools coming</div>
+            <div style={{ fontSize: 12, color: 'var(--text-4)' }}>New AI tools are added regularly — check back soon</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+            <Zap size={12} style={{ color: 'var(--text-3)' }} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)' }}>Powered by Groq LLM</span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

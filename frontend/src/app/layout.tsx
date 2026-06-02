@@ -1,24 +1,23 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Sidebar from '@/components/layout/Sidebar'
-
-const inter = Inter({ subsets: ['latin'] })
+import MobileNavigation from '@/components/layout/MobileNavigation'
 
 export const metadata: Metadata = {
-  title: 'VedaAI – AI Assessment Creator',
-  description: 'Create intelligent assignments with AI',
+  title: 'VedaAI – AI Assessment Platform',
+  description: 'Generate structured question papers instantly with AI',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 min-h-screen`}>
-        <div className="flex h-screen overflow-hidden">
+      <body>
+        <div className="app-shell">
           <Sidebar />
-          <main className="flex-1 overflow-auto">
+          <MobileNavigation />
+          <div className="main-content">
             {children}
-          </main>
+          </div>
         </div>
       </body>
     </html>

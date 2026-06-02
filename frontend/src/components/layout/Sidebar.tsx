@@ -2,75 +2,126 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, Users, BookOpen, Wand2, Library, Settings, Plus
+  Home, Users, BookOpen, Wand2, Library, Settings,
+  Plus
 } from 'lucide-react'
+import { useAssignmentStore } from '@/store'
 
 const navItems = [
-  { icon: Home, label: 'Home', href: '/home' },
-  { icon: Users, label: 'My Groups', href: '/groups' },
-  { icon: BookOpen, label: 'Assignments', href: '/assignments' },
-  { icon: Wand2, label: "AI Teacher's Toolkit", href: '/toolkit' },
-  { icon: Library, label: 'My Library', href: '/library' },
+  { icon: Home,     label: 'Home',                 href: '/home' },
+  { icon: Users,    label: 'My Groups',            href: '/groups' },
+  { icon: BookOpen, label: 'Assignments',          href: '/assignments', hasBadge: true },
+  { icon: Wand2,    label: "AI Teacher's Toolkit", href: '/toolkit' },
+  { icon: Library,  label: 'My Library',           href: '/library' },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { assignments } = useAssignmentStore()
+
+  function isActive(href: string) {
+    return pathname === href || (href !== '/' && pathname.startsWith(href))
+  }
+
+  const totalAssignments = assignments.length
 
   return (
-    <aside className="w-[185px] bg-white border-r border-gray-100 flex flex-col h-full shrink-0">
+    <aside className="sidebar">
       {/* Logo */}
-      <div className="px-4 py-5">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-               style={{ background: 'linear-gradient(135deg, #FF6B2B, #E8520A)' }}>
-            <span className="text-white font-bold text-xs">V</span>
-          </div>
-          <span className="font-bold text-base text-gray-900">VedaAI</span>
+      <div className="sidebar-logo">
+        <div className="sidebar-logo-mark" style={{ background: 'linear-gradient(135deg, #ea580c, #f97316)' }}>
+          {/* Stylized custom 'V' for VedaAI */}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4.5L12 19.5L20 4.5" />
+          </svg>
         </div>
+        <span className="sidebar-logo-text" style={{ fontSize: '15px' }}>VedaAI</span>
       </div>
 
-      {/* Create Assignment Button */}
-      <div className="px-3 mb-4">
-        <Link href="/assignments/create" className="btn-primary w-full justify-center text-xs py-2">
+      {/* Create Button with Glow Pill Style */}
+      <div style={{ padding: '16px 12px 6px' }}>
+        <Link
+          href="/assignments/create"
+          className="btn-pill-glow"
+          style={{ width: '100%', textDecoration: 'none' }}
+        >
           <Plus size={14} />
           Create Assignment
         </Link>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-2 space-y-0.5">
-        {navItems.map(({ icon: Icon, label, href }) => {
-          const active = pathname === href || (href !== '/' && pathname.startsWith(href))
+      {/* Nav Link List */}
+      <div className="sidebar-section" style={{ padding: '10px 10px' }}>
+        {navItems.map(({ icon: Icon, label, href, hasBadge }) => {
+          const active = isActive(href)
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                active
-                  ? 'bg-gray-100 text-gray-900 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
+              className={`nav-item${active ? ' active' : ''}`}
+              style={{
+                marginBottom: '2px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                background: active ? 'var(--surface-2)' : 'transparent',
+                color: active ? 'var(--text-1)' : 'var(--text-3)',
+                fontWeight: active ? '600' : '500'
+              }}
             >
-              <Icon size={15} />
-              {label}
+              <Icon size={15} className="nav-icon" />
+              <span style={{ flex: 1 }}>{label}</span>
+              {hasBadge && totalAssignments > 0 && (
+                <span className="sidebar-badge">{totalAssignments}</span>
+              )}
             </Link>
           )
         })}
-      </nav>
+      </div>
 
-      {/* Bottom */}
-      <div className="border-t border-gray-100 p-3 space-y-2">
-        <Link href="/settings" className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-          <Settings size={15} />
+      {/* Footer Institution/School Drawer */}
+      <div className="sidebar-footer" style={{ padding: '10px 10px' }}>
+        <Link 
+          href="/settings" 
+          className={`nav-item${isActive('/settings') ? ' active' : ''}`} 
+          style={{ 
+            marginBottom: '10px',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            fontSize: '13px'
+          }}
+        >
+          <Settings size={15} className="nav-icon" />
           Settings
         </Link>
-        <div className="flex items-center gap-2.5 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-            <span className="text-xs font-medium text-orange-700">A</span>
+        
+        <div className="user-card" style={{ padding: '8px 10px', borderRadius: '10px' }}>
+          <div 
+            className="user-avatar" 
+            style={{ 
+              width: '32px', 
+              height: '32px', 
+              borderRadius: '50%', 
+              background: 'linear-gradient(135deg, #fef08a, #fde047)', 
+              border: '1px solid var(--border-strong)', 
+              color: '#854d0e', 
+              fontSize: '11px', 
+              fontWeight: '700',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            DPS
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-gray-900 truncate">Delhi Public School</p>
-            <p className="text-[10px] text-gray-500 truncate">Bokaro Steel City</p>
+          <div style={{ flex: 1, minWidth: 0, marginLeft: '4px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.2' }}>
+              Delhi Public School
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--text-4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+              Bokaro Steel City
+            </div>
           </div>
         </div>
       </div>

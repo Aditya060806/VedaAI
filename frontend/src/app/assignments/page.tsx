@@ -1,111 +1,64 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, Fragment } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Filter, MoreVertical, Trash2, Eye } from 'lucide-react'
-import Topbar from '@/components/layout/Topbar'
+import {
+  Plus, Search, MoreVertical, Trash2, Eye, BookOpen,
+  Calendar, RefreshCw, ChevronDown, ArrowLeft, Bell
+} from 'lucide-react'
 import { useAssignmentStore } from '@/store'
 import { api } from '@/lib/api'
 import { Assignment } from '@/types'
 import { format } from 'date-fns'
 
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full py-24 text-center">
-      {/* Illustration */}
-      <div className="relative mb-6">
-        <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="20" r="18" stroke="#D1D5DB" strokeWidth="2"/>
-              <path d="M14 16h12M14 20h8" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M26 26l6 6" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round"/>
-              <circle cx="22" cy="22" r="6" stroke="#EF4444" strokeWidth="2"/>
-              <path d="M19 22l2 2 3-3" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-purple-200" />
-        <div className="absolute top-0 -left-2 w-2.5 h-2.5 rounded-full bg-blue-200" />
-      </div>
-      <h2 className="text-base font-semibold text-gray-900 mb-2">No assignments yet</h2>
-      <p className="text-sm text-gray-500 max-w-xs mb-6">
-        Create your first assignment to start collecting and grading student submissions.
-        You can set up rubrics, define marking criteria, and let AI assist with grading.
-      </p>
-      <Link href="/assignments/create" className="btn-primary">
-        <Plus size={14} />
-        Create Your First Assignment
-      </Link>
-    </div>
-  )
-}
+type Status = 'all' | 'completed' | 'processing' | 'pending' | 'failed'
 
-function AssignmentCard({ assignment, onDelete }: { assignment: Assignment; onDelete: (id: string) => void }) {
+function Menu({ assignment, onDelete }: { assignment: Assignment; onDelete: () => void }) {
   const router = useRouter()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const fmtDate = (d: string) => {
-    try { return format(new Date(d), 'dd-MM-yyyy') } catch { return d }
-  }
+  const close = useCallback(() => setOpen(false), [])
 
   return (
-    <div className="card p-4 hover:shadow-md transition-shadow relative">
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-sm text-gray-900 pr-4">{assignment.title}</h3>
-        <div className="relative">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1 rounded hover:bg-gray-100 transition-colors"
+    <div style={{ position: 'relative' }}>
+      <button
+        className="btn-ghost"
+        style={{ width: 28, height: 28, padding: 0, borderRadius: 'var(--radius-sm)', color: 'var(--text-3)' }}
+        onClick={e => { e.stopPropagation(); setOpen(v => !v) }}
+      >
+        <MoreVertical size={14} />
+      </button>
+      {open && (
+        <Fragment>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={close} />
+          <div
+            className="card animate-fade-in"
+            style={{
+              position: 'absolute', right: 0, top: 32,
+              zIndex: 50, width: 150, padding: '4px',
+              boxShadow: 'var(--shadow-lg)',
+              borderRadius: '8px',
+              border: '1px solid var(--border)'
+            }}
           >
-            <MoreVertical size={14} className="text-gray-400" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-7 bg-white border border-gray-100 rounded-lg shadow-lg z-10 py-1 min-w-[140px]">
-              <button
-                onClick={() => { router.push(`/assignments/${assignment._id}`); setMenuOpen(false) }}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
-              >
-                <Eye size={13} /> View Assignment
-              </button>
-              <button
-                onClick={() => { onDelete(assignment._id); setMenuOpen(false) }}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
-              >
-                <Trash2 size={13} /> Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4 text-xs text-gray-500">
-        <span>
-          <span className="font-medium text-gray-700">Assigned on :</span>{' '}
-          {fmtDate(assignment.createdAt)}
-        </span>
-        <span>
-          <span className="font-medium text-gray-700">Due :</span>{' '}
-          {fmtDate(assignment.dueDate)}
-        </span>
-      </div>
-
-      {/* Status badge */}
-      <div className="mt-3">
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-          assignment.status === 'completed' ? 'bg-green-50 text-green-700' :
-          assignment.status === 'processing' ? 'bg-blue-50 text-blue-700' :
-          assignment.status === 'failed' ? 'bg-red-50 text-red-700' :
-          'bg-gray-50 text-gray-600'
-        }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${
-            assignment.status === 'completed' ? 'bg-green-500' :
-            assignment.status === 'processing' ? 'bg-blue-500 animate-pulse' :
-            assignment.status === 'failed' ? 'bg-red-500' : 'bg-gray-400'
-          }`} />
-          {assignment.status}
-        </span>
-      </div>
+            <button
+              className="btn-ghost"
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '8px 10px', gap: 8, borderRadius: '6px', fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' }}
+              onClick={() => { router.push(`/assignments/${assignment._id}`); close() }}
+            >
+              View Assignment
+            </button>
+            <div className="divider" style={{ margin: '4px 0' }} />
+            <button
+              className="btn-ghost"
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '8px 10px', gap: 8, borderRadius: '6px', fontSize: '12px', fontWeight: '500', color: '#dc2626' }}
+              onClick={() => { onDelete(); close() }}
+            >
+              Delete
+            </button>
+          </div>
+        </Fragment>
+      )}
     </div>
   )
 }
@@ -113,79 +66,299 @@ function AssignmentCard({ assignment, onDelete }: { assignment: Assignment; onDe
 export default function AssignmentsPage() {
   const { assignments, setAssignments, removeAssignment } = useAssignmentStore()
   const [search, setSearch] = useState('')
+  const [status, setStatus] = useState<Status>('all')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const router = useRouter()
 
-  useEffect(() => {
-    api.getAssignments()
-      .then(setAssignments)
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+  const load = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true)
+    else setRefreshing(true)
+    try {
+      const data = await api.getAssignments()
+      setAssignments(data)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [setAssignments])
 
-  const filtered = assignments.filter(a =>
-    a.title.toLowerCase().includes(search.toLowerCase())
-  )
+  useEffect(() => { load() }, [load])
+
+  const filtered = assignments.filter(a => {
+    const matchSearch = a.title.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = status === 'all' || a.status === status
+    return matchSearch && matchStatus
+  })
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this assignment?')) return
-    await api.deleteAssignment(id)
-    removeAssignment(id)
+    if (!confirm('Delete this assignment? This cannot be undone.')) return
+    try {
+      await api.deleteAssignment(id)
+      removeAssignment(id)
+    } catch (e) {
+      alert('Failed to delete. Please try again.')
+    }
+  }
+
+  function fmtDate(d: string) {
+    try { return format(new Date(d), 'dd-MM-yyyy') } catch { return d }
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <Topbar />
-      <div className="flex-1 p-6 overflow-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-green-400" />
-            <h1 className="font-bold text-base text-gray-900">Assignments</h1>
-          </div>
-          <p className="text-xs text-gray-500 ml-4">Manage and create assignments for your classes.</p>
+    <Fragment>
+      {/* High-Fidelity Header Navigation */}
+      <div 
+        className="no-print" 
+        style={{ 
+          height: '52px', 
+          borderBottom: '1px solid var(--border)', 
+          background: 'var(--surface)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '0 32px 0 40px',
+          flexShrink: 0
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            onClick={() => router.push('/home')} 
+            className="btn-ghost" 
+            style={{ 
+              width: '28px', 
+              height: '28px', 
+              borderRadius: '50%', 
+              padding: 0, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}
+          >
+            <ArrowLeft size={14} />
+          </button>
+          <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: '500' }}>Assignment</span>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-24 text-sm text-gray-400">Loading...</div>
-        ) : assignments.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <>
-            {/* Search + Filter */}
-            <div className="flex items-center gap-3 mb-5">
-              <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-                <Filter size={13} /> Filter By
-              </button>
-              <div className="relative flex-1 max-w-xs">
-                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  className="input pl-8"
-                  placeholder="Search Assignment"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={() => load(true)} className="btn-ghost" style={{ width: '28px', height: '28px', padding: 0, borderRadius: '50%' }}>
+            <RefreshCw size={13} className={refreshing ? 'anim-spin' : ''} />
+          </button>
+          
+          <button className="btn-ghost" style={{ width: '28px', height: '28px', padding: 0, borderRadius: '50%', position: 'relative' }}>
+            <Bell size={14} />
+            <span style={{ position: 'absolute', top: 6, right: 6, width: 6, height: 6, borderRadius: '50%', background: '#ea580c' }} />
+          </button>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filtered.map(a => (
-                <AssignmentCard key={a._id} assignment={a} onDelete={handleDelete} />
-              ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+            <div 
+              style={{ 
+                width: '26px', 
+                height: '26px', 
+                borderRadius: '50%', 
+                background: 'linear-gradient(135deg, #fef08a, #fde047)',
+                border: '1px solid var(--border-strong)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '9px',
+                fontWeight: '700',
+                color: '#854d0e'
+              }}
+            >
+              AP
             </div>
-          </>
-        )}
+            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>Aditya Pandey</span>
+            <ChevronDown size={11} style={{ color: 'var(--text-4)' }} />
+          </div>
+        </div>
       </div>
 
-      {/* FAB */}
-      {assignments.length > 0 && (
-        <div className="sticky bottom-6 flex justify-center pb-6">
-          <Link href="/assignments/create" className="btn-primary shadow-lg">
+      <div className="page-body">
+        {/* Title Header with green dot */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', flexShrink: 0 }} />
+            <h1 className="page-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
+              Assignments
+            </h1>
+          </div>
+          <p className="page-desc" style={{ fontSize: '12.5px', color: 'var(--text-3)', marginTop: '4px' }}>
+            Manage and create assignments for your classes
+          </p>
+        </div>
+
+        {/* Search & Filter Row */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <select
+              className="input"
+              value={status}
+              onChange={e => setStatus(e.target.value as Status)}
+              style={{
+                appearance: 'none',
+                padding: '7px 28px 7px 12px',
+                fontSize: '12.5px',
+                fontWeight: '500',
+                borderRadius: '8px',
+                border: '1.5px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text-2)',
+                cursor: 'pointer',
+                minWidth: '100px'
+              }}
+            >
+              <option value="all">Filter By</option>
+              <option value="completed">Completed</option>
+              <option value="processing">Processing</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+            <ChevronDown size={11} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
+          </div>
+
+          <div className="search-bar" style={{ flex: 1, maxWidth: '280px' }}>
+            <Search size={13} className="search-icon" style={{ left: '10px' }} />
+            <input
+              className="input"
+              placeholder="Search Assignment"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                padding: '6px 12px 6px 30px',
+                fontSize: '12.5px',
+                borderRadius: '8px',
+                border: '1.5px solid var(--border)'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="card-assignment" style={{ minHeight: '120px' }}>
+                <div>
+                  <div className="skeleton" style={{ width: '70%', height: '14px', marginBottom: '8px' }} />
+                  <div className="skeleton" style={{ width: '40%', height: '10px' }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                  <div className="skeleton" style={{ width: '35%', height: '10px' }} />
+                  <div className="skeleton" style={{ width: '35%', height: '10px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          /* Slide 4 High Fidelity Magnifier-X Empty State */
+          <div className="card" style={{ padding: '80px 24px', border: '1.5px solid var(--border)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                {/* SVG Illustration of Document */}
+                <svg width="84" height="84" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.85 }}>
+                  <rect x="25" y="10" width="50" height="70" rx="8" fill="#f4f4f5" stroke="#e4e4e7" strokeWidth="2.5"/>
+                  <line x1="38" y1="26" x2="62" y2="26" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="38" y1="36" x2="54" y2="36" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="38" y1="46" x2="58" y2="46" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                  <line x1="38" y1="56" x2="48" y2="56" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+                {/* Magnifying Glass with Red X */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  right: '10px',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: '#ffffff',
+                  border: '3px solid #09090b',
+                  boxShadow: '0 6px 14px rgba(0,0,0,0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {/* Red X icon */}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </div>
+                {/* Magnifier Handle */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '2px',
+                  right: '2px',
+                  width: '14px',
+                  height: '6px',
+                  background: '#09090b',
+                  transform: 'rotate(45deg)',
+                  borderRadius: '2px'
+                }} />
+              </div>
+            </div>
+            
+            <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)', marginBottom: '8px', textAlign: 'center' }}>
+              No assignments yet
+            </h2>
+            <p style={{ fontSize: '12px', color: 'var(--text-3)', maxWidth: '380px', lineHeight: '1.6', textAlign: 'center', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
+            </p>
+            
+            <Link 
+              href="/assignments/create" 
+              className="btn btn-black"
+              style={{ 
+                borderRadius: '99px',
+                padding: '8px 20px',
+                fontSize: '12.5px',
+                fontWeight: '600'
+              }}
+            >
+              <Plus size={14} /> Create Your First Assignment
+            </Link>
+          </div>
+        ) : (
+          /* Slide 2 Card Grid Layout */
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '60px' }}>
+            {filtered.map(a => (
+              <div
+                key={a._id}
+                className="card-assignment"
+                onClick={() => router.push(`/assignments/${a._id}`)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                  <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: 'var(--text-1)', margin: 0, lineHeight: '1.3' }}>
+                    {a.title}
+                  </h3>
+                  <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                    <Menu assignment={a} onDelete={() => handleDelete(a._id)} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', fontSize: '11px', color: 'var(--text-3)' }}>
+                  <span>
+                    Assigned on : <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.createdAt)}</strong>
+                  </span>
+                  <span>
+                    Due : <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.dueDate)}</strong>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Slide 2 Bottom Floating + Create Assignment Capsule */}
+        {!loading && filtered.length > 0 && (
+          <Link href="/assignments/create" className="floating-pill-create" style={{ textDecoration: 'none' }}>
             <Plus size={14} />
             Create Assignment
           </Link>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </Fragment>
   )
 }

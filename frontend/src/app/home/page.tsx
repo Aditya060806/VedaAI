@@ -1,160 +1,258 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, BookOpen, Clock, CheckCircle, AlertCircle, ArrowRight, Zap, TrendingUp, Users } from 'lucide-react'
+import {
+  Plus, BookOpen, Clock, CheckCircle, AlertCircle,
+  ArrowRight, Zap, TrendingUp, Users, Activity
+} from 'lucide-react'
 import Topbar from '@/components/layout/Topbar'
 import { api } from '@/lib/api'
 import { Assignment } from '@/types'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
+
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 5)  return 'Good night'
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function StatusPill({ status }: { status: Assignment['status'] }) {
+  const map: Record<string, { cls: string; dot: string; label: string }> = {
+    completed:  { cls: 'pill-success',  dot: 'dot-success', label: 'Completed'  },
+    processing: { cls: 'pill-info',     dot: 'dot-info',    label: 'Processing' },
+    pending:    { cls: 'pill-warning',  dot: 'dot-warning', label: 'Pending'    },
+    failed:     { cls: 'pill-danger',   dot: 'dot-danger',  label: 'Failed'     },
+  }
+  const c = map[status] || map.pending
+  return (
+    <span className={`pill ${c.cls}`}>
+      <span className={`dot ${c.dot}`} />
+      {c.label}
+    </span>
+  )
+}
 
 export default function HomePage() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.getAssignments().then(setAssignments).catch(console.error).finally(() => setLoading(false))
+    api.getAssignments()
+      .then(setAssignments)
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
-  const total = assignments.length
+  const total     = assignments.length
   const completed = assignments.filter(a => a.status === 'completed').length
-  const pending = assignments.filter(a => a.status === 'pending' || a.status === 'processing').length
-  const failed = assignments.filter(a => a.status === 'failed').length
-  const recent = assignments.slice(0, 3)
+  const active    = assignments.filter(a => a.status === 'pending' || a.status === 'processing').length
+  const failed    = assignments.filter(a => a.status === 'failed').length
+  const rate      = total > 0 ? Math.round((completed / total) * 100) : 0
+  const recent    = assignments.slice(0, 5)
 
   const fmtDate = (d: string) => {
-    try { return format(new Date(d), 'dd MMM yyyy') } catch { return d }
+    try { return format(new Date(d), 'MMM dd, yyyy') } catch { return d }
   }
-
-  const statusIcon = (status: Assignment['status']) => {
-    if (status === 'completed') return <CheckCircle size={13} className="text-green-500" />
-    if (status === 'failed') return <AlertCircle size={13} className="text-red-400" />
-    return <Clock size={13} className="text-blue-400 animate-pulse" />
+  const fmtRelative = (d: string) => {
+    try { return formatDistanceToNow(new Date(d), { addSuffix: true }) } catch { return d }
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <Topbar label="Home" />
-      <div className="flex-1 p-6 overflow-auto">
+    <>
+      <Topbar title="Home" />
+      <div className="page-body">
 
-        {/* Welcome banner */}
-        <div className="rounded-2xl p-6 mb-6 text-white relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)' }}>
-          <div className="absolute right-0 top-0 w-48 h-48 rounded-full opacity-5 bg-white -translate-y-12 translate-x-12" />
-          <div className="absolute right-16 bottom-0 w-24 h-24 rounded-full opacity-5 bg-orange-400 translate-y-8" />
-          <p className="text-xs text-gray-400 mb-1">Good morning 👋</p>
-          <h1 className="text-xl font-bold mb-1">Welcome back, Aditya Pandey</h1>
-          <p className="text-sm text-gray-400 mb-5">Delhi Public School, Bokaro Steel City</p>
-          <Link href="/assignments/create"
-            className="inline-flex items-center gap-2 bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-100 transition-colors">
-            <Plus size={14} /> Create Assignment
-          </Link>
+        {/* Welcome */}
+        <div style={{ marginBottom: 32 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 4 }}>
+            {getGreeting()}, Aditya 👋
+          </p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>
+            {loading ? 'Loading your workspace...' : total === 0 ? 'Welcome to VedaAI' : `You have ${total} assignment${total !== 1 ? 's' : ''}`}
+          </h1>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
           {[
-            { label: 'Total Assignments', value: loading ? '—' : total, icon: BookOpen, color: 'bg-blue-50 text-blue-500' },
-            { label: 'Completed', value: loading ? '—' : completed, icon: CheckCircle, color: 'bg-green-50 text-green-500' },
-            { label: 'In Progress', value: loading ? '—' : pending, icon: Clock, color: 'bg-orange-50 text-orange-500' },
-            { label: 'Failed', value: loading ? '—' : failed, icon: AlertCircle, color: 'bg-red-50 text-red-400' },
-          ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="card p-4 flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-xl ${color} flex items-center justify-center shrink-0`}>
-                <Icon size={16} />
+            { label: 'Total',      value: total,     icon: BookOpen,      sub: 'All time' },
+            { label: 'Completed',  value: completed,  icon: CheckCircle,   sub: `${rate}% rate` },
+            { label: 'In Progress',value: active,     icon: Activity,      sub: 'Generating' },
+            { label: 'Failed',     value: failed,     icon: AlertCircle,   sub: 'Need retry' },
+          ].map(({ label, value, icon: Icon, sub }, i) => (
+            <div
+              key={label}
+              className="card animate-fade-up"
+              style={{ padding: '20px', animationDelay: `${i * 50}ms` }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-3)' }}>{label}</span>
+                <Icon size={14} style={{ color: 'var(--text-4)' }} />
               </div>
-              <div>
-                <p className="text-lg font-bold text-gray-900">{value}</p>
-                <p className="text-[11px] text-gray-500 leading-tight">{label}</p>
+              <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-1)', lineHeight: 1 }}>
+                {loading ? <div className="skeleton" style={{ width: 40, height: 28 }} /> : value}
               </div>
+              <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 6 }}>{sub}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20 }}>
 
-          {/* Recent Assignments */}
-          <div className="md:col-span-2 card p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-sm text-gray-900">Recent Assignments</h2>
-              <Link href="/assignments" className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1">
+          {/* Recent assignments */}
+          <div className="card">
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>Recent Assignments</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Your latest activity</div>
+              </div>
+              <Link href="/assignments" className="btn btn-outline btn-sm" style={{ fontSize: 12 }}>
                 View all <ArrowRight size={12} />
               </Link>
             </div>
 
             {loading ? (
-              <div className="space-y-3">
-                {[1,2,3].map(i => (
-                  <div key={i} className="h-14 bg-gray-50 rounded-lg animate-pulse" />
+              <div style={{ padding: 24 }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, paddingBottom: 16, marginBottom: 16, borderBottom: '1px solid var(--border)' }}>
+                    <div className="skeleton" style={{ width: 36, height: 36, borderRadius: 8, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div className="skeleton" style={{ width: '60%', height: 12, marginBottom: 6 }} />
+                      <div className="skeleton" style={{ width: '40%', height: 10 }} />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : recent.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <BookOpen size={28} className="text-gray-200 mb-3" />
-                <p className="text-sm text-gray-400">No assignments yet</p>
-                <Link href="/assignments/create" className="mt-3 text-xs text-orange-500 hover:underline">
-                  Create your first one →
+              <div className="empty" style={{ padding: '48px 24px' }}>
+                <div className="empty-icon-wrap">
+                  <BookOpen size={22} style={{ color: 'var(--text-4)' }} />
+                </div>
+                <div className="empty-title">No assignments yet</div>
+                <div className="empty-desc">Create your first AI-powered question paper to get started</div>
+                <Link href="/assignments/create" className="btn btn-black">
+                  <Plus size={13} /> Create Assignment
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2">
-                {recent.map(a => (
-                  <Link key={a._id} href={`/assignments/${a._id}`}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group">
-                    <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                      <BookOpen size={14} className="text-orange-500" />
+              <div>
+                {recent.map((a, i) => (
+                  <Link
+                    key={a._id}
+                    href={`/assignments/${a._id}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 14,
+                      padding: '14px 24px',
+                      borderBottom: i < recent.length - 1 ? '1px solid var(--border)' : 'none',
+                      transition: 'background 0.1s ease',
+                      textDecoration: 'none',
+                    }}
+                    className="animate-fade-up"
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = '')}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <BookOpen size={14} style={{ color: 'var(--text-3)' }} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{a.title}</p>
-                      <p className="text-[11px] text-gray-400">Due: {fmtDate(a.dueDate)}</p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 2 }}>
+                        Due {fmtDate(a.dueDate)} · Created {fmtRelative(a.createdAt)}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {statusIcon(a.status)}
-                      <span className="text-[11px] text-gray-500 capitalize">{a.status}</span>
-                    </div>
-                    <ArrowRight size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
+                    <StatusPill status={a.status} />
+                    <ArrowRight size={13} style={{ color: 'var(--text-4)', flexShrink: 0 }} />
                   </Link>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Quick Actions */}
-          <div className="card p-5">
-            <h2 className="font-semibold text-sm text-gray-900 mb-4">Quick Actions</h2>
-            <div className="space-y-2">
-              {[
-                { icon: Plus, label: 'New Assignment', sub: 'Generate with AI', href: '/assignments/create', active: true },
-                { icon: Users, label: 'My Groups', sub: 'Manage classes', href: '/groups', active: true },
-                { icon: Zap, label: 'AI Toolkit', sub: 'Teaching tools', href: '/toolkit', active: true },
-                { icon: TrendingUp, label: 'My Library', sub: 'Saved papers', href: '/library', active: true },
-              ].map(({ icon: Icon, label, sub, href }) => (
-                <Link key={label} href={href}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-orange-50 flex items-center justify-center shrink-0 transition-colors">
-                    <Icon size={14} className="text-gray-500 group-hover:text-orange-500 transition-colors" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-800">{label}</p>
-                    <p className="text-[11px] text-gray-400">{sub}</p>
-                  </div>
-                  <ArrowRight size={12} className="text-gray-300 group-hover:text-gray-500 ml-auto transition-colors" />
-                </Link>
-              ))}
+          {/* Right panel */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+            {/* Quick actions */}
+            <div className="card">
+              <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>Quick Actions</div>
+              </div>
+              <div style={{ padding: '8px' }}>
+                {[
+                  { icon: Plus,       label: 'New Assignment', sub: 'Generate with AI',  href: '/assignments/create' },
+                  { icon: Users,      label: 'My Groups',      sub: 'Manage classes',    href: '/groups'             },
+                  { icon: Zap,        label: 'AI Toolkit',     sub: 'Teaching tools',    href: '/toolkit'            },
+                  { icon: TrendingUp, label: 'My Library',     sub: 'Saved papers',      href: '/library'            },
+                ].map(({ icon: Icon, label, sub, href }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '9px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      transition: 'background 0.1s ease',
+                      textDecoration: 'none',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = '')}
+                  >
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={12} style={{ color: 'var(--text-3)' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>{label}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-4)' }}>{sub}</div>
+                    </div>
+                    <ArrowRight size={11} style={{ color: 'var(--text-4)', flexShrink: 0 }} />
+                  </Link>
+                ))}
+              </div>
             </div>
 
-            {/* AI tip */}
-            <div className="mt-4 p-3 rounded-xl bg-orange-50 border border-orange-100">
-              <div className="flex items-center gap-2 mb-1">
-                <Zap size={12} className="text-orange-500" />
-                <p className="text-[11px] font-semibold text-orange-700">AI Tip</p>
+            {/* Completion */}
+            {!loading && total > 0 && (
+              <div className="card" style={{ padding: '16px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>Completion Rate</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)' }}>{rate}%</span>
+                </div>
+                <div className="progress">
+                  <div className="progress-bar" style={{ width: `${rate}%` }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, color: 'var(--text-4)' }}>
+                  <span>{completed} completed</span>
+                  <span>{total - completed} remaining</span>
+                </div>
               </div>
-              <p className="text-[11px] text-orange-600 leading-relaxed">
-                Upload a PDF chapter when creating an assignment for more accurate, topic-specific questions.
-              </p>
+            )}
+
+            {/* System status */}
+            <div className="card" style={{ padding: '14px 18px' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)', marginBottom: 10 }}>System</div>
+              {[
+                { label: 'AI Generation',   status: 'Operational' },
+                { label: 'Database',         status: 'Operational' },
+                { label: 'Queue Worker',     status: 'Operational' },
+              ].map(({ label, status }) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{label}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#15803d' }}>
+                    <span className="dot dot-success" style={{ width: 5, height: 5 }} />{status}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

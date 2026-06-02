@@ -17,7 +17,7 @@ const stats = [
 export default function LibraryPage() {
   return (
     <div className="flex flex-col h-full">
-      <Topbar label="My Library" />
+      <Topbar title="My Library" />
       <div className="flex-1 p-6 overflow-auto">
 
         {/* Header */}
