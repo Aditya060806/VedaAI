@@ -66,7 +66,7 @@ export default function HomePage() {
 
         {/* Welcome */}
         <div style={{ marginBottom: 32 }}>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 4 }}>
+          <p suppressHydrationWarning style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 4 }}>
             {getGreeting()}, Aditya 👋
           </p>
           <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-1)' }}>

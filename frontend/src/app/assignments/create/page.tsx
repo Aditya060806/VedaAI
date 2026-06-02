@@ -303,6 +303,7 @@ export default function CreateAssignmentPage() {
                     setErrors(err => { const n = { ...err }; delete n.dueDate; return n })
                   }}
                   min={new Date().toISOString().split('T')[0]}
+                  suppressHydrationWarning
                 />
               </div>
               {errors.dueDate && <div className="form-error">{errors.dueDate}</div>}
