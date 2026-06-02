@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef, Fragment } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Download, RefreshCw, Loader2, XCircle, Printer, CheckCircle, ArrowLeft, Bell, ChevronDown } from 'lucide-react'
 import { api } from '@/lib/api'
@@ -175,7 +175,7 @@ export default function AssignmentDetailPage() {
   const isPending = assignment?.status === 'pending' || assignment?.status === 'processing'
 
   return (
-    <Fragment>
+    <>
       {/* High-Fidelity Header Navigation */}
       <div 
         className="no-print" 
@@ -291,6 +291,6 @@ export default function AssignmentDetailPage() {
       ) : (
         <GeneratingView />
       )}
-    </Fragment>
+    </>
   )
 }

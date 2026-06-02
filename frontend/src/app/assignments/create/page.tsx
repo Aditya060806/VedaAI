@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, Fragment } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Upload, Plus, Minus, X, Calendar, ChevronDown,
@@ -94,7 +94,7 @@ export default function CreateAssignmentPage() {
   const totalM = store.totalMarks()
 
   return (
-    <Fragment>
+    <>
       {/* High-Fidelity Header Navigation */}
       <div 
         className="no-print" 
@@ -547,18 +547,6 @@ export default function CreateAssignmentPage() {
         </div>
       </div>
 
-      {/* Stack css override for responsive layout row */}
-      <style jsx global>{`
-        @media (max-width: 600px) {
-          .responsive-qt-row {
-            flex-direction: column !important;
-            align-items: stretch !important;
-          }
-          .responsive-qt-row > div {
-            width: 100% !important;
-          }
-        }
-      `}</style>
-    </Fragment>
+    </>
   )
 }

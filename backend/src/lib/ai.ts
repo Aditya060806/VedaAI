@@ -23,7 +23,8 @@ export type ParsedPaper = {
 function buildPrompt(
   questionTypes: QuestionType[],
   additionalInstructions: string,
-  fileName?: string
+  fileName?: string,
+  fileContent?: string
 ): string {
   const totalQuestions = questionTypes.reduce((s, q) => s + q.count, 0)
 
@@ -46,13 +47,18 @@ ${qtDesc}
 Total Questions: ${totalQuestions}
 Total Marks: ${totalMarks}
 
-${fileName ? `Reference material: ${fileName}` : ''}
+  ${fileName ? `Reference material filename: ${fileName}` : ''}
 
-${
-  additionalInstructions
+  ${fileContent ? `
+--- DOCUMENT CONTENT START ---
+${fileContent}
+--- DOCUMENT CONTENT END ---
+Use this document content to generate relevant, curriculum-aligned questions.
+` : ''}
+
+  ${additionalInstructions
     ? `Additional instructions: ${additionalInstructions}`
-    : ''
-}
+    : ''}
 
 IMPORTANT:
 Respond ONLY with a valid JSON object.
@@ -111,13 +117,15 @@ Rules:
 export async function generateQuestionPaper(
   questionTypes: QuestionType[],
   additionalInstructions: string,
-  fileName?: string
+  fileName?: string,
+  fileContent?: string
 ): Promise<ParsedPaper> {
   try {
     const prompt = buildPrompt(
       questionTypes,
       additionalInstructions,
-      fileName
+      fileName,
+      fileContent
     )
 
     const completion = await client.chat.completions.create({

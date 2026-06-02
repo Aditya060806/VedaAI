@@ -839,11 +839,65 @@
 .anim-spin       { animation: spin 0.8s linear infinite; }
 
 /* ─────────────────────────────────────────────
+   RESPONSIVE UTILITIES
+───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .responsive-qt-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .responsive-qt-row > div {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ─────────────────────────────────────────────
    PRINT
 ───────────────────────────────────────────── */
 @media print {
-  .no-print, .sidebar, .topbar, .banner { display: none !important; }
-  body { background: white; font-size: 11px; }
-  .card { box-shadow: none !important; border: 1px solid #e5e7eb; }
-  .page-body { padding: 0; overflow: visible; }
+  /* Hide all UI chrome */
+  .no-print,
+  .sidebar,
+  .topbar,
+  .banner,
+  .mobile-header,
+  .mobile-bottom-nav,
+  .floating-pill-create { display: none !important; }
+
+  /* Reset layout */
+  html, body {
+    background: white !important;
+    font-size: 11pt !important;
+    color: #000 !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Full-page paper */
+  .main-content, .app-shell, .page-body {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Clean paper card */
+  #question-paper-print {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+
+  /* Page breaks */
+  h1, h2, h3 { page-break-after: avoid; }
+  .section   { page-break-inside: avoid; }
 }

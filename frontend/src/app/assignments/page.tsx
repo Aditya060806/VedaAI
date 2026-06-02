@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useState, useCallback, Fragment } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Plus, Search, MoreVertical, Trash2, Eye, BookOpen,
-  Calendar, RefreshCw, ChevronDown, ArrowLeft, Bell
+  Plus, Search, MoreVertical, BookOpen,
+  RefreshCw, ChevronDown, ArrowLeft, Bell
 } from 'lucide-react'
 import { useAssignmentStore } from '@/store'
 import { api } from '@/lib/api'
@@ -29,7 +29,7 @@ function Menu({ assignment, onDelete }: { assignment: Assignment; onDelete: () =
         <MoreVertical size={14} />
       </button>
       {open && (
-        <Fragment>
+        <>
           <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={close} />
           <div
             className="card animate-fade-in"
@@ -57,7 +57,7 @@ function Menu({ assignment, onDelete }: { assignment: Assignment; onDelete: () =
               Delete
             </button>
           </div>
-        </Fragment>
+        </>
       )}
     </div>
   )
@@ -108,7 +108,7 @@ export default function AssignmentsPage() {
   }
 
   return (
-    <Fragment>
+    <>
       {/* High-Fidelity Header Navigation */}
       <div 
         className="no-print" 
@@ -323,31 +323,47 @@ export default function AssignmentsPage() {
         ) : (
           /* Slide 2 Card Grid Layout */
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '60px' }}>
-            {filtered.map(a => (
-              <div
-                key={a._id}
-                className="card-assignment"
-                onClick={() => router.push(`/assignments/${a._id}`)}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                  <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: 'var(--text-1)', margin: 0, lineHeight: '1.3' }}>
-                    {a.title}
-                  </h3>
-                  <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
-                    <Menu assignment={a} onDelete={() => handleDelete(a._id)} />
+            {filtered.map(a => {
+              const totalQ = a.questionTypes.reduce((s, q) => s + q.count, 0)
+              const totalM = a.questionTypes.reduce((s, q) => s + q.count * q.marks, 0)
+              const statusColors: Record<string, { bg: string; dot: string; text: string }> = {
+                completed:  { bg: '#f0fdf4', dot: '#22c55e', text: '#15803d' },
+                processing: { bg: '#eff6ff', dot: '#3b82f6', text: '#1d4ed8' },
+                pending:    { bg: '#fefce8', dot: '#eab308', text: '#854d0e' },
+                failed:     { bg: '#fff1f2', dot: '#ef4444', text: '#dc2626' },
+              }
+              const sc = statusColors[a.status] || statusColors.pending
+              return (
+                <div
+                  key={a._id}
+                  className="card-assignment"
+                  onClick={() => router.push(`/assignments/${a._id}`)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-1)', margin: '0 0 8px 0', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.title}
+                      </h3>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: '99px', background: sc.bg, fontSize: '10.5px', fontWeight: '600', color: sc.text }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
+                        {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
+                      </span>
+                    </div>
+                    <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                      <Menu assignment={a} onDelete={() => handleDelete(a._id)} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-3)' }}>
+                    <span style={{ display: 'flex', gap: '10px' }}>
+                      <span><strong style={{ color: 'var(--text-2)' }}>{totalQ}</strong> Qs</span>
+                      <span><strong style={{ color: 'var(--text-2)' }}>{totalM}</strong> Marks</span>
+                    </span>
+                    <span>Due <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.dueDate)}</strong></span>
                   </div>
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '24px', fontSize: '11px', color: 'var(--text-3)' }}>
-                  <span>
-                    Assigned on : <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.createdAt)}</strong>
-                  </span>
-                  <span>
-                    Due : <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.dueDate)}</strong>
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 
@@ -359,6 +375,6 @@ export default function AssignmentsPage() {
           </Link>
         )}
       </div>
-    </Fragment>
+    </>
   )
 }

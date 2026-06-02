@@ -1,10 +1,21 @@
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { Worker, Job } from 'bullmq'
+import Redis from 'ioredis'
+import fs from 'fs'
 import { redisConnection, QUEUE_NAME, GenerationJobData } from './lib/queue'
 import { Assignment, QuestionPaper } from './models'
 import { generateQuestionPaper } from './lib/ai'
-import { notifyClients } from './lib/websocket'
+
+// Publisher — separate connection from subscriber
+const publisher = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+  tls: process.env.REDIS_URL?.startsWith('rediss://') ? {} : undefined,
+})
+
+function publish(assignmentId: string, payload: Record<string, unknown>) {
+  publisher.publish('ws:notify', JSON.stringify(payload)).catch(console.error)
+}
 
 async function main() {
   // Connect to MongoDB
@@ -19,18 +30,47 @@ async function main() {
 
       // 1. Update assignment status → processing
       await Assignment.findByIdAndUpdate(assignmentId, { status: 'processing' })
-      notifyClients(assignmentId, {
+      publish(assignmentId, {
         type: 'status',
         assignmentId,
         status: 'processing',
         message: 'Generating your question paper...',
       })
 
-      // 2. Call AI
-      await job.updateProgress(30)
-      const paper = await generateQuestionPaper(questionTypes, additionalInstructions, fileName)
+      // 2. Try to read file content (TXT files only)
+      let fileContent: string | undefined
+      if (fileName) {
+        const uploadsDir = 'uploads'
+        try {
+          // Find the file matching the original name
+          const files = fs.readdirSync(uploadsDir)
+          // Match by original name suffix or direct path from DB
+          const assignment = await Assignment.findById(assignmentId)
+          if (assignment?.fileUrl) {
+            const filePath = assignment.fileUrl.replace('/uploads/', `${uploadsDir}/`)
+            if (fs.existsSync(filePath)) {
+              const ext = filePath.split('.').pop()?.toLowerCase()
+              if (ext === 'txt') {
+                fileContent = fs.readFileSync(filePath, 'utf-8').slice(0, 4000)
+                console.log(`[Worker] Read file content: ${fileContent.length} chars`)
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[Worker] Could not read file content:', e)
+        }
+      }
 
-      // 3. Store result in MongoDB
+      // 3. Call AI
+      await job.updateProgress(30)
+      const paper = await generateQuestionPaper(
+        questionTypes,
+        additionalInstructions,
+        fileName,
+        fileContent
+      )
+
+      // 4. Store result in MongoDB
       await job.updateProgress(80)
       const qp = await QuestionPaper.create({
         assignmentId,
@@ -43,12 +83,12 @@ async function main() {
         answerKey: paper.answerKey,
       })
 
-      // 4. Update assignment status → completed
+      // 5. Update assignment status → completed
       await Assignment.findByIdAndUpdate(assignmentId, { status: 'completed' })
       await job.updateProgress(100)
 
-      // 5. Notify frontend via WebSocket
-      notifyClients(assignmentId, {
+      // 6. Notify frontend via Redis Pub/Sub → WebSocket
+      publish(assignmentId, {
         type: 'completed',
         assignmentId,
         paperId: qp._id.toString(),
@@ -65,7 +105,7 @@ async function main() {
     console.error(`[Worker] ❌ Job ${job?.id} failed:`, err.message)
     if (job?.data.assignmentId) {
       await Assignment.findByIdAndUpdate(job.data.assignmentId, { status: 'failed' })
-      notifyClients(job.data.assignmentId, {
+      publish(job.data.assignmentId, {
         type: 'failed',
         assignmentId: job.data.assignmentId,
         message: err.message,

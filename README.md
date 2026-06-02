@@ -7,45 +7,105 @@ VedaAI is a full-stack AI-powered assessment creation platform designed to help 
 ## Architecture Overview
 
 ```
-VedaAI/
-├── frontend/          # Next.js 14 + TypeScript + Tailwind CSS + Zustand
-├── backend/           # Express + TypeScript + MongoDB + Redis + BullMQ
-└── docker-compose.yml # Redis container setup
+┌─────────────────────────────────────────────────────────────────────┐
+│                          VedaAI Architecture                        │
+│                                                                     │
+│  ┌──────────────────┐          ┌────────────────────────────────┐  │
+│  │   Next.js 14     │  HTTPS   │     Express + TypeScript       │  │
+│  │   Frontend       │◄────────►│     REST API (port 4000)      │  │
+│  │                  │          │                                │  │
+│  │  Zustand Store   │  WSS     │     WebSocket Server (/ws)    │  │
+│  │  useJobSocket()  │◄────────►│     (same HTTP server)        │  │
+│  └──────────────────┘          └───────────┬────────────────────┘  │
+│                                             │                       │
+│                                    ┌────────▼──────────┐           │
+│                                    │   BullMQ Queue    │           │
+│                                    │   (Redis/Upstash) │           │
+│                                    └────────┬──────────┘           │
+│                                             │                       │
+│                                    ┌────────▼──────────┐           │
+│                                    │  Background Worker │           │
+│                                    │  (worker.ts)      │           │
+│                                    │                   │           │
+│                                    │  1. Reads file    │           │
+│                                    │  2. Calls Groq AI │           │
+│                                    │  3. Saves to DB   │           │
+│                                    │  4. Publishes to  │           │
+│                                    │     Redis Pub/Sub │           │
+│                                    └────────┬──────────┘           │
+│                                             │ Redis Pub/Sub         │
+│                                    ┌────────▼──────────┐           │
+│                                    │  WS Server picks  │           │
+│                                    │  up notification  │           │
+│                                    │  → pushes to      │           │
+│                                    │    browser        │           │
+│                                    └───────────────────┘           │
+│                                                                     │
+│  MongoDB Atlas ← Assignment + QuestionPaper stored here             │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### System Workflow
+### Data Flow (Happy Path)
 
 ```
-Teacher creates assignment → POST /api/assignments
-                                   ↓
-                         Job added to BullMQ queue
-                                   ↓
-                          Worker processes request
-                                   ↓
-                     Groq LLM generates question paper
-                                   ↓
-                     Structured JSON response parsed
-                                   ↓
-                        Data stored in MongoDB
-                                   ↓
-                  WebSocket updates sent to frontend
-                                   ↓
-                  Generated paper rendered in UI
+1.  Teacher fills form → Zustand captures state
+2.  POST /api/assignments (multipart FormData with optional file)
+3.  Backend validates → saves Assignment to MongoDB (status: pending)
+4.  Job enqueued to BullMQ via Redis
+5.  Response 201 sent → frontend redirects to /assignments/:id
+6.  useJobSocket() opens WebSocket and subscribes by assignmentId
+7.  Worker picks up job:
+      a. Reads TXT file content from disk (if uploaded)
+      b. Builds structured prompt with question types + content
+      c. Calls Groq llama-3.3-70b with JSON response_format
+      d. Parses + validates structured JSON
+      e. Saves QuestionPaper to MongoDB
+      f. Updates Assignment status → completed
+      g. Publishes to Redis channel ws:notify
+8.  WS Server subscribes to ws:notify → broadcasts to browser
+9.  Browser receives completed event → fetches paper via GET /api/assignments/:id/paper
+10. OutputPage renders sections, difficulty badges, answer key
 ```
+
+---
+
+## Approach & Design Decisions
+
+### Why Groq + Llama-3.3-70b?
+- Groq provides extremely fast inference (sub-2s generation for most papers)
+- `response_format: { type: 'json_object' }` guarantees parseable JSON — no raw AI text is ever rendered to the user
+- Structured prompt forces section-by-section generation with difficulty distribution (40% Easy, 40% Moderate, 20% Hard)
+
+### Why BullMQ + Redis?
+- AI generation can take 5–40 seconds — too long for a synchronous HTTP request
+- BullMQ provides automatic retries, concurrency control, and job progress tracking
+- Redis Pub/Sub is used for worker→WebSocket notification so the two processes don't need to share memory
+
+### Why Zustand?
+- Lightweight, zero-boilerplate state for the multi-step assignment form
+- FormStore persists across step navigation without prop drilling
+- AssignmentStore caches the list so sidebar badge counts work instantly
+
+### Why WebSockets over polling?
+- Polling wastes bandwidth and creates noticeable status update delays
+- WebSockets allow instant push notification when the paper is ready
+- The server uses a Map of `assignmentId → Set<WebSocket>` for targeted delivery
 
 ---
 
 ## Features
 
-- ✅ AI-powered structured question paper generation
-- ✅ Automatic answer key generation
-- ✅ Real-time assignment status tracking using WebSockets
-- ✅ Redis queue-based background processing with BullMQ
+- ✅ AI-powered structured question paper generation (sections A, B, C…)
+- ✅ Styled difficulty badges (Easy/Moderate/Hard) on each question
+- ✅ Automatic answer key with toggle to show/hide
+- ✅ Real-time assignment status via WebSocket + Redis Pub/Sub
+- ✅ Redis queue-based background processing (BullMQ)
+- ✅ TXT file upload content ingested into AI prompt
 - ✅ Assignment regeneration support
-- ✅ Modular monorepo architecture
-- ✅ Fully responsive teacher dashboard
-- ✅ Production deployment with Vercel + Render
-- ✅ MongoDB Atlas cloud database integration
+- ✅ Status pills on assignment cards (pending / processing / completed / failed)
+- ✅ Clean PDF export via browser print (full @media print stylesheet)
+- ✅ Responsive teacher dashboard (desktop sidebar + mobile bottom nav)
+- ✅ Production deployment: Vercel (frontend) + Render (backend) + Upstash (Redis)
 
 ---
 
@@ -56,13 +116,13 @@ Teacher creates assignment → POST /api/assignments
 | Frontend                | Next.js 14, TypeScript, Tailwind CSS, Zustand |
 | Backend                 | Node.js, Express, TypeScript                  |
 | Database                | MongoDB Atlas                                 |
-| Queue System            | Redis + BullMQ                                |
-| Real-time Communication | WebSockets (`ws`)                             |
-| AI Integration          | Groq LLM API                                  |
+| Queue System            | Redis (Upstash) + BullMQ                      |
+| Real-time Communication | WebSockets (`ws`) + Redis Pub/Sub             |
+| AI Integration          | Groq API (llama-3.3-70b-versatile)            |
 | Deployment              | Vercel (frontend) + Render (backend)          |
-| Infrastructure          | Docker                                        |
 
 ---
+
 
 ## Local Setup Guide
 
