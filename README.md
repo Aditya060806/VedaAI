@@ -1,437 +1,157 @@
-# VedaAI – AI-Powered Assessment Generation Platform
+<div align="center">
+  <img src="frontend/public/logo.png" alt="VedaAI Logo" width="120" />
+  
+  # VedaAI 🎓
+  ### The Smart Assessment Platform for Modern Educators
+  
+  <p align="center">
+    <a href="https://veda-ai-eta.vercel.app" target="_blank">
+      <img src="https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel" alt="Live Demo" />
+    </a>
+    <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
+    <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
+  </p>
 
-VedaAI is a full-stack AI-powered assessment creation platform designed to help teachers generate structured question papers instantly. The platform automates assignment creation, AI-based question generation, answer key creation, real-time processing, and assignment management through an interactive dashboard.
+  <p><strong>Transforming hours of manual test creation into seconds of AI-powered magic.</strong></p>
+</div>
 
 ---
 
-## Architecture Overview
+## 🌟 What is VedaAI?
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                          VedaAI Architecture                        │
-│                                                                     │
-│  ┌──────────────────┐          ┌────────────────────────────────┐  │
-│  │   Next.js 14     │  HTTPS   │     Express + TypeScript       │  │
-│  │   Frontend       │◄────────►│     REST API (port 4000)      │  │
-│  │                  │          │                                │  │
-│  │  Zustand Store   │  WSS     │     WebSocket Server (/ws)    │  │
-│  │  useJobSocket()  │◄────────►│     (same HTTP server)        │  │
-│  └──────────────────┘          └───────────┬────────────────────┘  │
-│                                             │                       │
-│                                    ┌────────▼──────────┐           │
-│                                    │   BullMQ Queue    │           │
-│                                    │   (Redis/Upstash) │           │
-│                                    └────────┬──────────┘           │
-│                                             │                       │
-│                                    ┌────────▼──────────┐           │
-│                                    │  Background Worker │           │
-│                                    │  (worker.ts)      │           │
-│                                    │                   │           │
-│                                    │  1. Reads file    │           │
-│                                    │  2. Calls Groq AI │           │
-│                                    │  3. Saves to DB   │           │
-│                                    │  4. Publishes to  │           │
-│                                    │     Redis Pub/Sub │           │
-│                                    └────────┬──────────┘           │
-│                                             │ Redis Pub/Sub         │
-│                                    ┌────────▼──────────┐           │
-│                                    │  WS Server picks  │           │
-│                                    │  up notification  │           │
-│                                    │  → pushes to      │           │
-│                                    │    browser        │           │
-│                                    └───────────────────┘           │
-│                                                                     │
-│  MongoDB Atlas ← Assignment + QuestionPaper stored here             │
-└─────────────────────────────────────────────────────────────────────┘
-```
+Creating high-quality, balanced question papers is one of the most time-consuming tasks for teachers. **VedaAI** is a full-stack platform that solves this problem. 
 
-### Data Flow (Happy Path)
+By simply uploading a curriculum document or specifying a topic, teachers can instantly generate a fully structured question paper—complete with varied difficulty levels, different question types, and a comprehensive answer key. 
 
-```
-1.  Teacher fills form → Zustand captures state
-2.  POST /api/assignments (multipart FormData with optional file)
-3.  Backend validates → saves Assignment to MongoDB (status: pending)
-4.  Job enqueued to BullMQ via Redis
-5.  Response 201 sent → frontend redirects to /assignments/:id
-6.  useJobSocket() opens WebSocket and subscribes by assignmentId
-7.  Worker picks up job:
-      a. Reads TXT file content from disk (if uploaded)
-      b. Builds structured prompt with question types + content
-      c. Calls Groq llama-3.3-70b with JSON response_format
-      d. Parses + validates structured JSON
-      e. Saves QuestionPaper to MongoDB
-      f. Updates Assignment status → completed
-      g. Publishes to Redis channel ws:notify
-8.  WS Server subscribes to ws:notify → broadcasts to browser
-9.  Browser receives completed event → fetches paper via GET /api/assignments/:id/paper
-10. OutputPage renders sections, difficulty badges, answer key
+## ✨ Key Features
+
+- **🚀 Instant Generation:** Create a complete, curriculum-aligned question paper in under 2 seconds.
+- **🧠 Context-Aware AI:** Upload your own class notes or PDF documents to ensure the questions match your specific syllabus.
+- **📊 Balanced Difficulty:** Automatically distributes questions across Easy, Medium, and Hard difficulty levels.
+- **✅ Auto-Generated Answer Keys:** Every test comes with a hidden answer key that teachers can toggle on and off.
+- **🖨️ Print-Ready Exports:** Seamlessly export generated papers into clean, professional PDF documents ready for the classroom.
+- **📱 Beautiful Dashboard:** A premium, fully responsive interface built for both desktop and mobile devices.
+
+---
+
+## 🛠️ How It Works (The Technical Magic)
+
+Behind the simple interface is a powerful, decoupled system designed to be fast, reliable, and scalable.
+
+### System Architecture
+
+```mermaid
+graph TD
+    Client[Next.js Web App] -->|1. Submit Request| API[Express API Server]
+    Client <-->|4. Live Updates| WS[WebSocket Server]
+    
+    API -->|2. Send Job| Redis[(Upstash Redis Queue)]
+    API -->|Store Status| Mongo[(MongoDB Atlas)]
+    
+    Worker[Background Worker] <-- 3. Process Job --- Redis
+    Worker <-->|Generate| Groq[Groq LLM Llama-3]
+    Worker -->|Save Paper| Mongo
+    Worker -->|Notify Done!| WS
 ```
 
----
+### 💡 Why I Built It This Way (Engineering Highlights)
 
-## Approach & Design Decisions
+When building AI applications, waiting for the AI to finish thinking can cause the app to freeze or timeout. I architected VedaAI to solve these exact problems:
 
-### Why Groq + Llama-3.3-70b?
-- Groq provides extremely fast inference (sub-2s generation for most papers)
-- `response_format: { type: 'json_object' }` guarantees parseable JSON — no raw AI text is ever rendered to the user
-- Structured prompt forces section-by-section generation with difficulty distribution (40% Easy, 40% Moderate, 20% Hard)
-
-### Why BullMQ + Redis?
-- AI generation can take 5–40 seconds — too long for a synchronous HTTP request
-- BullMQ provides automatic retries, concurrency control, and job progress tracking
-- Redis Pub/Sub is used for worker→WebSocket notification so the two processes don't need to share memory
-
-### Why Zustand?
-- Lightweight, zero-boilerplate state for the multi-step assignment form
-- FormStore persists across step navigation without prop drilling
-- AssignmentStore caches the list so sidebar badge counts work instantly
-
-### Why WebSockets over polling?
-- Polling wastes bandwidth and creates noticeable status update delays
-- WebSockets allow instant push notification when the paper is ready
-- The server uses a Map of `assignmentId → Set<WebSocket>` for targeted delivery
+1. **Lightning-Fast AI (Groq + Llama 3):** Standard AI models take up to 30 seconds to write a test. By using Groq's specialized hardware, VedaAI generates the entire test in **under 2 seconds**. The AI is strictly instructed to return clean JSON data, ensuring the app never breaks from badly formatted text.
+2. **Never Freezing the App (BullMQ + Redis):** Instead of making the user wait on a loading screen, the Express backend immediately passes the heavy AI task to a **Background Worker**. This means the main server stays fast and responsive for everyone else.
+3. **Live Updates without Refreshing (WebSockets):** How does the user know when the test is ready? Instead of the browser constantly asking the server "Is it done yet?" (which wastes data), the server uses **WebSockets** to push a notification to the user the exact millisecond the AI finishes.
 
 ---
 
-## Features
+## 💻 The Tech Stack
 
-- ✅ AI-powered structured question paper generation (sections A, B, C…)
-- ✅ Styled difficulty badges (Easy/Moderate/Hard) on each question
-- ✅ Automatic answer key with toggle to show/hide
-- ✅ Real-time assignment status via WebSocket + Redis Pub/Sub
-- ✅ Redis queue-based background processing (BullMQ)
-- ✅ TXT file upload content ingested into AI prompt
-- ✅ Assignment regeneration support
-- ✅ Status pills on assignment cards (pending / processing / completed / failed)
-- ✅ Clean PDF export via browser print (full @media print stylesheet)
-- ✅ Responsive teacher dashboard (desktop sidebar + mobile bottom nav)
-- ✅ Production deployment: Vercel (frontend) + Render (backend) + Upstash (Redis)
+| Part of the App | Technologies Used |
+| :--- | :--- |
+| **Frontend (User Interface)** | Next.js 14, React, TypeScript, Tailwind CSS, Zustand, Clerk Auth |
+| **Backend (The Brain)** | Node.js, Express, TypeScript, Multer (File Uploads) |
+| **Queues & Real-time** | `ws` (WebSockets), BullMQ, Redis Pub/Sub |
+| **Database & AI** | MongoDB Atlas, Mongoose, Groq API (`llama-3.3-70b`) |
+| **Hosting & Infrastructure**| Vercel (Frontend), Render (Backend), Upstash (Serverless Redis) |
 
 ---
 
-## Tech Stack
+## 🚀 Running the Project Locally
 
-| Layer                   | Technology                                    |
-| ----------------------- | --------------------------------------------- |
-| Frontend                | Next.js 14, TypeScript, Tailwind CSS, Zustand |
-| Backend                 | Node.js, Express, TypeScript                  |
-| Database                | MongoDB Atlas                                 |
-| Queue System            | Redis (Upstash) + BullMQ                      |
-| Real-time Communication | WebSockets (`ws`) + Redis Pub/Sub             |
-| AI Integration          | Groq API (llama-3.3-70b-versatile)            |
-| Deployment              | Vercel (frontend) + Render (backend)          |
+Want to try running the code on your own computer? It's easy! Follow these steps.
 
----
+### What you need first:
+1. **Node.js** installed on your computer.
+2. **Docker Desktop** running (to run the Redis database).
+3. Free API keys from: [Groq](https://console.groq.com), [MongoDB Atlas](https://www.mongodb.com/atlas), and [Clerk](https://clerk.com).
 
-
-## Local Setup Guide
-
-Follow these steps in order to run VedaAI on your local machine.
-
-### Prerequisites
-
-Make sure the following are installed before you begin:
-
-| Tool              | Version  | Purpose                        |
-| ----------------- | -------- | ------------------------------ |
-| Node.js           | 18+      | Runtime for frontend & backend |
-| npm               | 8+       | Package manager                |
-| Docker Desktop    | Latest   | Runs the Redis container       |
-| Git               | Any      | Clone the repository           |
-
-You will also need:
-- A **Groq API Key** – [Get one at console.groq.com](https://console.groq.com)
-- A **MongoDB Atlas URI** – [Create a free cluster at mongodb.com](https://www.mongodb.com/atlas)
-
----
-
-### Step 1 — Clone the Repository
-
+### Step 1: Download & Install
+Open your terminal and run:
 ```bash
+# Clone the code
 git clone https://github.com/Aditya060806/VedaAI.git
 cd VedaAI
+
+# Install dependencies for both parts of the app
+cd frontend && npm install && cd ..
+cd backend && npm install && cd ..
 ```
 
----
+### Step 2: Add Your Secret Keys
+Create two `.env` files to store your keys.
 
-### Step 2 — Install Dependencies
-
-Install packages for both the frontend and backend:
-
-```bash
-# Install frontend dependencies
-cd frontend
-npm install
-
-# Install backend dependencies
-cd ../backend
-npm install
-```
-
-> **Tip:** Alternatively, run `npm install` from the root to install workspaces together (requires `npm 8+`).
-
----
-
-### Step 3 — Configure Environment Variables
-
-You need two `.env` files — one for the backend and one for the frontend.
-
-#### Backend — create `backend/.env`
-
+**1. Inside the `backend` folder, create `.env`:**
 ```env
 PORT=4000
-MONGODB_URI=your_mongodb_atlas_connection_string
+MONGODB_URI=your_mongodb_connection_string
 REDIS_URL=redis://localhost:6379
 GROQ_API_KEY=your_groq_api_key
 FRONTEND_URL=http://localhost:3000
 ```
 
-> Replace `your_mongodb_atlas_connection_string` and `your_groq_api_key` with your real credentials.
-
-#### Frontend — create `frontend/.env.local`
-
+**2. Inside the `frontend` folder, create `.env.local`:**
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
 NEXT_PUBLIC_WS_URL=ws://localhost:4000/ws
+
+# Get these from your Clerk Dashboard
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+CLERK_SECRET_KEY=your_clerk_secret
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 ```
 
----
+### Step 3: Start the App!
+You'll need three separate terminal windows to run the different parts of the system:
 
-### Step 4 — Start the Redis Container
-
-VedaAI uses Redis as the job queue. Start it via Docker:
-
+**Terminal 1: Start the Database Queue**
 ```bash
-# From the project root
 docker-compose up -d
 ```
 
-Verify Redis is running:
-
-```bash
-docker ps
-# You should see a container named "vedaai-redis" or similar
-```
-
----
-
-### Step 5 — Start the Backend API Server
-
-Open a **new terminal** and run:
-
+**Terminal 2: Start the Backend & AI Worker**
 ```bash
 cd backend
 npm run dev
 ```
 
-Expected output:
-```
-✅ Connected to MongoDB
-✅ API server running on port 4000
-```
-
----
-
-### Step 6 — Start the Background Worker
-
-Open another **new terminal** and run:
-
-```bash
-cd backend
-npm run worker
-```
-
-Expected output:
-```
-✅ Worker connected to MongoDB
-✅ Worker listening on queue: vedaai-jobs
-```
-
-> The worker is responsible for processing AI generation jobs from the Redis queue. It **must** be running alongside the backend for assignments to generate.
-
----
-
-### Step 7 — Start the Frontend
-
-Open a **new terminal** and run:
-
+**Terminal 3: Start the Website**
 ```bash
 cd frontend
 npm run dev
 ```
 
-Expected output:
-```
-▲ Next.js 14.x.x
-- Local: http://localhost:3000
-```
+Finally, open your browser and go to **http://localhost:3000**. You're ready to create AI tests!
 
 ---
 
-### Step 8 — Open the App
+## 👨‍💻 About the Author
 
-Visit the app in your browser:
+Built by **Aditya Pandey**.
 
-```
-http://localhost:3000
-```
+- **GitHub:** [@Aditya060806](https://github.com/Aditya060806)
+- **Live Project:** [veda-ai-eta.vercel.app](https://veda-ai-eta.vercel.app)
 
-You should see the VedaAI dashboard. Create a new assignment to test the full flow!
-
----
-
-## Running All Services (Quick Mode)
-
-From the project root, you can start both the backend and frontend together using:
-
-```bash
-npm run dev
-```
-
-> Note: You still need to start Docker (`docker-compose up -d`) and the worker (`cd backend && npm run worker`) separately.
-
----
-
-## API Endpoints
-
-| Method | Endpoint                          | Description                          |
-| ------ | --------------------------------- | ------------------------------------ |
-| GET    | `/api/assignments`                | Fetch all assignments                |
-| POST   | `/api/assignments`                | Create assignment and enqueue AI job |
-| GET    | `/api/assignments/:id`            | Fetch assignment details             |
-| DELETE | `/api/assignments/:id`            | Delete assignment                    |
-| GET    | `/api/assignments/:id/paper`      | Fetch generated question paper       |
-| POST   | `/api/assignments/:id/regenerate` | Regenerate question paper            |
-| GET    | `/api/health`                     | Health check                         |
-
----
-
-## WebSocket Events
-
-Connect to the WebSocket endpoint:
-
-```
-ws://localhost:4000/ws          (local)
-wss://your-backend.onrender.com/ws  (production)
-```
-
-### Subscribe to an Assignment
-
-```json
-{
-  "type": "subscribe",
-  "assignmentId": "assignment_id_here"
-}
-```
-
-### Incoming Events
-
-| Event type  | Description                        | Payload fields              |
-| ----------- | ---------------------------------- | --------------------------- |
-| `status`    | Assignment status changed          | `status`, `message`         |
-| `completed` | Paper generated successfully       | `paperId`, `message`        |
-| `failed`    | Generation failed                  | `message`                   |
-
-Example payloads:
-
-```json
-{ "type": "status", "status": "processing", "message": "Generating your question paper..." }
-```
-
-```json
-{ "type": "completed", "paperId": "paper_id_here", "message": "Question paper ready!" }
-```
-
-```json
-{ "type": "failed", "message": "AI generation failed. Please try again." }
-```
-
----
-
-## Deployment
-
-### Frontend → Vercel
-
-```bash
-cd frontend
-npx vercel --prod
-```
-
-Set the following environment variables in the Vercel dashboard:
-
-```env
-NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
-NEXT_PUBLIC_WS_URL=wss://your-backend.onrender.com/ws
-```
-
----
-
-### Backend → Render
-
-In your Render service settings:
-
-| Setting       | Value                           |
-| ------------- | ------------------------------- |
-| Root Directory| `backend`                       |
-| Build Command | `npm install && npm run build`  |
-| Start Command | `npm run start:all`             |
-
-Required environment variables on Render:
-
-```env
-MONGODB_URI=your_mongodb_atlas_uri
-REDIS_URL=your_redis_url
-GROQ_API_KEY=your_groq_api_key
-FRONTEND_URL=https://your-vercel-app.vercel.app
-```
-
-> `npm run start:all` runs both the API server and the worker process concurrently.
-
----
-
-## Production Architecture
-
-```
-Vercel (Frontend: Next.js)
-          ↓  HTTP / WebSocket
-Render (Backend: Express API + BullMQ Worker)
-          ↓
-  Redis Queue (Upstash / Render Redis)
-          ↓
-  MongoDB Atlas (Cloud Database)
-          ↓
-  Groq LLM API (AI Generation)
-```
-
----
-
-## Troubleshooting
-
-| Problem                        | Solution                                                          |
-| ------------------------------ | ----------------------------------------------------------------- |
-| `Cannot connect to MongoDB`    | Check your `MONGODB_URI` is correct and Atlas network access allows your IP |
-| `Redis connection refused`     | Make sure Docker is running and `docker-compose up -d` was executed |
-| `Assignment stuck in "pending"`| The worker is not running — start it with `npm run worker`        |
-| `CORS error in browser`        | Verify `FRONTEND_URL` in backend `.env` matches your frontend URL |
-| `AI generation fails`          | Check your `GROQ_API_KEY` is valid and has quota remaining        |
-
----
-
-## Future Enhancements
-
-- [ ] PDF export for generated question papers
-- [ ] Teacher authentication & role-based access
-- [ ] Assignment analytics dashboard
-- [ ] AI difficulty customization
-- [ ] Multi-language question generation
-- [ ] Classroom and student management
-- [ ] Rich text editor for manual question editing
-
----
-
-## Author
-
-Developed and maintained by **Aditya Pandey**.
-
-- GitHub: [@Aditya060806](https://github.com/Aditya060806)
-- Repository: [VedaAI](https://github.com/Aditya060806/VedaAI)
+> *This project was built as a comprehensive showcase of full-stack engineering, modern system architecture, and practical AI integration.*
