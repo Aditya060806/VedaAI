@@ -3,8 +3,8 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
-  Plus, Search, MoreVertical, BookOpen,
-  RefreshCw, ChevronDown, ArrowLeft, Bell
+  Plus, Search, MoreVertical, BookOpen, Filter,
+  RefreshCw, ChevronDown, ArrowLeft, Bell, Sparkles
 } from 'lucide-react'
 import { useAssignmentStore } from '@/store'
 import { api } from '@/lib/api'
@@ -32,26 +32,26 @@ function Menu({ assignment, onDelete }: { assignment: Assignment; onDelete: () =
         <>
           <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={close} />
           <div
-            className="card animate-fade-in"
+            className="animate-fade-in"
             style={{
               position: 'absolute', right: 0, top: 32,
-              zIndex: 50, width: 150, padding: '4px',
-              boxShadow: 'var(--shadow-lg)',
-              borderRadius: '8px',
-              border: '1px solid var(--border)'
+              zIndex: 50, width: 140, padding: '6px',
+              background: '#ffffff',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+              borderRadius: '12px',
+              border: 'none'
             }}
           >
             <button
               className="btn-ghost"
-              style={{ width: '100%', justifyContent: 'flex-start', padding: '8px 10px', gap: 8, borderRadius: '6px', fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' }}
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', color: 'var(--text-1)' }}
               onClick={() => { router.push(`/assignments/${assignment._id}`); close() }}
             >
               View Assignment
             </button>
-            <div className="divider" style={{ margin: '4px 0' }} />
             <button
               className="btn-ghost"
-              style={{ width: '100%', justifyContent: 'flex-start', padding: '8px 10px', gap: 8, borderRadius: '6px', fontSize: '12px', fontWeight: '500', color: '#dc2626' }}
+              style={{ width: '100%', justifyContent: 'flex-start', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', color: '#dc2626' }}
               onClick={() => { onDelete(); close() }}
             >
               Delete
@@ -191,23 +191,24 @@ export default function AssignmentsPage() {
         </div>
 
         {/* Search & Filter Row */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', alignItems: 'center' }}>
+        <div className="desktop-search-row" style={{ display: 'flex', gap: '16px', marginBottom: '28px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
+            <Filter size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
             <select
               className="input"
               value={status}
               onChange={e => setStatus(e.target.value as Status)}
               style={{
                 appearance: 'none',
-                padding: '7px 28px 7px 12px',
-                fontSize: '12.5px',
-                fontWeight: '500',
-                borderRadius: '8px',
-                border: '1.5px solid var(--border)',
-                background: 'var(--surface)',
-                color: 'var(--text-2)',
+                padding: '10px 36px 10px 40px',
+                fontSize: '13px',
+                fontWeight: '600',
+                borderRadius: '99px',
+                border: '1px solid var(--border)',
+                background: '#ffffff',
+                color: 'var(--text-3)',
                 cursor: 'pointer',
-                minWidth: '100px'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
               }}
             >
               <option value="all">Filter By</option>
@@ -216,21 +217,23 @@ export default function AssignmentsPage() {
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
             </select>
-            <ChevronDown size={11} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
           </div>
 
-          <div className="search-bar" style={{ flex: 1, maxWidth: '280px' }}>
-            <Search size={13} className="search-icon" style={{ left: '10px' }} />
+          <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
+            <Search size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
             <input
               className="input"
               placeholder="Search Assignment"
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{
-                padding: '6px 12px 6px 30px',
-                fontSize: '12.5px',
-                borderRadius: '8px',
-                border: '1.5px solid var(--border)'
+                padding: '10px 16px 10px 40px',
+                fontSize: '13px',
+                fontWeight: '500',
+                borderRadius: '99px',
+                border: '1px solid var(--border)',
+                background: '#ffffff',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
               }}
             />
           </div>
@@ -254,7 +257,7 @@ export default function AssignmentsPage() {
           </div>
         ) : filtered.length === 0 ? (
           /* Slide 4 High Fidelity Magnifier-X Empty State */
-          <div className="card" style={{ padding: '80px 24px', border: '1.5px solid var(--border)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
               <div style={{ position: 'relative', width: '100px', height: '100px' }}>
                 {/* SVG Illustration of Document */}
@@ -322,44 +325,39 @@ export default function AssignmentsPage() {
           </div>
         ) : (
           /* Slide 2 Card Grid Layout */
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px', paddingBottom: '60px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '16px', paddingBottom: '60px' }}>
             {filtered.map(a => {
-              const totalQ = a.questionTypes.reduce((s, q) => s + q.count, 0)
-              const totalM = a.questionTypes.reduce((s, q) => s + q.count * q.marks, 0)
-              const statusColors: Record<string, { bg: string; dot: string; text: string }> = {
-                completed:  { bg: '#f0fdf4', dot: '#22c55e', text: '#15803d' },
-                processing: { bg: '#eff6ff', dot: '#3b82f6', text: '#1d4ed8' },
-                pending:    { bg: '#fefce8', dot: '#eab308', text: '#854d0e' },
-                failed:     { bg: '#fff1f2', dot: '#ef4444', text: '#dc2626' },
-              }
-              const sc = statusColors[a.status] || statusColors.pending
               return (
                 <div
                   key={a._id}
                   className="card-assignment"
                   onClick={() => router.push(`/assignments/${a._id}`)}
+                  style={{
+                    padding: '24px 28px',
+                    borderRadius: '16px',
+                    border: 'none',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.02)',
+                    minHeight: 'auto'
+                  }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-1)', margin: '0 0 8px 0', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: '900', color: 'var(--text-1)', margin: '0 0 24px 0', lineHeight: '1.2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>
                         {a.title}
                       </h3>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: '99px', background: sc.bg, fontSize: '10.5px', fontWeight: '600', color: sc.text }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
-                        {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
-                      </span>
                     </div>
                     <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
                       <Menu assignment={a} onDelete={() => handleDelete(a._id)} />
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)', fontSize: '11px', color: 'var(--text-3)' }}>
-                    <span style={{ display: 'flex', gap: '10px' }}>
-                      <span><strong style={{ color: 'var(--text-2)' }}>{totalQ}</strong> Qs</span>
-                      <span><strong style={{ color: 'var(--text-2)' }}>{totalM}</strong> Marks</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-1)' }}>
+                    <span style={{ fontWeight: '700' }}>
+                      Assigned on : <span style={{ fontWeight: '500', color: 'var(--text-3)' }}>{fmtDate(a.createdAt)}</span>
                     </span>
-                    <span>Due <strong style={{ color: 'var(--text-2)' }}>{fmtDate(a.dueDate)}</strong></span>
+                    <span style={{ fontWeight: '700' }}>
+                      Due : <span style={{ fontWeight: '500', color: 'var(--text-3)' }}>{fmtDate(a.dueDate)}</span>
+                    </span>
                   </div>
                 </div>
               )
@@ -369,10 +367,16 @@ export default function AssignmentsPage() {
 
         {/* Slide 2 Bottom Floating + Create Assignment Capsule */}
         {!loading && filtered.length > 0 && (
-          <Link href="/assignments/create" className="floating-pill-create" style={{ textDecoration: 'none' }}>
-            <Plus size={14} />
-            Create Assignment
-          </Link>
+          <>
+            <div className="no-print floating-bottom-area" style={{ position: 'fixed', bottom: 0, left: '260px', right: 0, height: '120px', background: 'linear-gradient(to bottom, transparent, var(--surface) 80%)', pointerEvents: 'none', zIndex: 90 }} />
+            <Link 
+              href="/assignments/create" 
+              className="btn-pill-glow floating-pill-create no-print"
+              style={{ pointerEvents: 'auto', zIndex: 91, textDecoration: 'none' }}
+            >
+              <Sparkles size={14} /> Create Assignment
+            </Link>
+          </>
         )}
       </div>
     </>

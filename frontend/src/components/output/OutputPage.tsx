@@ -3,228 +3,198 @@ import { useState } from 'react'
 import { QuestionPaper } from '@/types'
 import { Download, ChevronDown, ChevronUp } from 'lucide-react'
 
-const DIFFICULTY_STYLES: Record<string, { bg: string; color: string; border: string }> = {
-  Easy:     { bg: '#f0fdf4', color: '#15803d', border: '#86efac' },
-  Moderate: { bg: '#fefce8', color: '#854d0e', border: '#fde68a' },
-  Hard:     { bg: '#fff1f2', color: '#dc2626', border: '#fecdd3' },
-}
-
 export default function OutputPage({ paper }: { paper: QuestionPaper }) {
   const [showAnswerKey, setShowAnswerKey] = useState(false)
 
-  return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px 48px' }}>
+  const totalQ = paper.sections.reduce((s, sec) => s + sec.questions.length, 0)
 
-      {/* Teacher Greeting Panel — hidden on print */}
+  return (
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 20px 60px' }}>
+
+      {/* ── Dark AI Greeting Banner ── */}
       <div
         className="no-print"
         style={{
-          background: '#18181b',
+          background: '#1a1a1a',
           color: '#ffffff',
           borderRadius: '12px',
-          padding: '22px 24px',
-          marginBottom: '28px',
-          boxShadow: 'var(--shadow-md)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
+          padding: '20px 24px',
+          marginBottom: '20px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #fef08a, #fde047)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '11px',
-              fontWeight: '700',
-              color: '#854d0e',
-              flexShrink: 0
-            }}
-          >
-            AP
-          </div>
-          <p style={{ margin: 0, fontSize: '13px', lineHeight: '1.6', fontWeight: '500', color: '#e4e4e7' }}>
-            Here is your customised question paper for{' '}
-            <strong style={{ color: '#fff' }}>Class {paper.className}</strong>{' '}
-            <strong style={{ color: '#fff' }}>{paper.subject}</strong>.
-            It contains{' '}
-            <strong style={{ color: '#fff' }}>
-              {paper.sections.reduce((s, sec) => s + sec.questions.length, 0)} questions
-            </strong>{' '}
-            across {paper.sections.length} section{paper.sections.length !== 1 ? 's' : ''} for{' '}
-            <strong style={{ color: '#fff' }}>{paper.totalMarks} marks</strong>.
-          </p>
-        </div>
+        <p style={{ margin: '0 0 16px 0', fontSize: '13.5px', lineHeight: '1.65', color: '#e4e4e7', fontWeight: '500' }}>
+          Certainly, Lakshya! Here are customized Question Paper for your{' '}
+          <strong style={{ color: '#fff' }}>
+            {paper.className ? `Class ${paper.className}` : ''}{' '}
+            {paper.subject}
+          </strong>{' '}
+          classes.{' '}
+          {paper.sections[0]?.instruction && (
+            <span style={{ color: '#a1a1aa' }}>{paper.sections[0].instruction}</span>
+          )}
+        </p>
 
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             onClick={() => window.print()}
-            className="btn"
             style={{
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: '#ffffff',
-              borderRadius: '99px',
-              padding: '6px 16px',
-              fontSize: '11.5px',
-              fontWeight: '600',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer'
+              gap: '7px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#ffffff',
+              borderRadius: '8px',
+              padding: '7px 16px',
+              fontSize: '12.5px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              backdropFilter: 'blur(4px)',
+              transition: 'background 0.15s ease'
             }}
           >
             <Download size={13} /> Download as PDF
           </button>
+
           <button
             onClick={() => setShowAnswerKey(v => !v)}
-            className="btn"
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: '#a1a1aa',
-              borderRadius: '99px',
-              padding: '6px 14px',
-              fontSize: '11.5px',
-              fontWeight: '600',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              cursor: 'pointer'
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: '#a1a1aa',
+              borderRadius: '8px',
+              padding: '7px 14px',
+              fontSize: '12.5px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            {showAnswerKey ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {showAnswerKey ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             {showAnswerKey ? 'Hide' : 'Show'} Answer Key
           </button>
         </div>
       </div>
 
-      {/* Printable Question Paper Sheet */}
+      {/* ── Printable Question Paper ── */}
       <div
         id="question-paper-print"
         style={{
-          background: 'white',
-          border: '1.5px solid var(--border)',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: 'var(--shadow-md)',
-          padding: '40px 48px'
+          background: '#ffffff',
+          border: '1px solid #e4e4e7',
+          borderRadius: '12px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+          padding: '40px 52px',
+          fontFamily: 'Georgia, "Times New Roman", serif',
         }}
       >
-        {/* School Header */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-1)', letterSpacing: '-0.01em', margin: '0 0 4px 0' }}>
+        {/* School / Paper Header */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <h1 style={{
+            fontSize: '17px',
+            fontWeight: '800',
+            color: '#0a0a0a',
+            letterSpacing: '0.01em',
+            margin: '0 0 4px 0',
+            fontFamily: 'inherit'
+          }}>
             {paper.schoolName || 'Delhi Public School, Sector-4, Bokaro'}
           </h1>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', fontSize: '13px', color: 'var(--text-2)', fontWeight: '600' }}>
-            <span>Subject: {paper.subject}</span>
-            <span style={{ color: 'var(--border-strong)' }}>·</span>
-            <span>Class: {paper.className}</span>
+          <div style={{ fontSize: '13px', color: '#333', fontWeight: '500', marginBottom: '2px' }}>
+            Subject: {paper.subject}
+          </div>
+          <div style={{ fontSize: '13px', color: '#333', fontWeight: '500' }}>
+            Class: {paper.className}
           </div>
         </div>
 
-        {/* Time & Marks Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-2)', fontWeight: '600' }}>
+        {/* Thin divider */}
+        <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '0 0 14px 0' }} />
+
+        {/* Time & Marks */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px', color: '#333', fontWeight: '500', marginBottom: '10px' }}>
           <span>Time Allowed: {paper.timeAllowed}</span>
           <span>Maximum Marks: {paper.totalMarks}</span>
         </div>
 
-        {/* General Instructions */}
-        <div style={{ padding: '10px 0', borderBottom: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-2)', fontWeight: '500', lineHeight: '1.5' }}>
+        {/* Instructions */}
+        <p style={{ fontSize: '12.5px', color: '#333', margin: '0 0 14px 0', fontWeight: '500' }}>
           All questions are compulsory unless stated otherwise.
-        </div>
+        </p>
 
-        {/* Student Info Fields */}
-        <div style={{ padding: '16px 0 24px', borderBottom: '1.5px solid #000', fontSize: '12.5px', color: 'var(--text-1)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <span style={{ marginRight: '6px', fontWeight: '600' }}>Name:</span>
-              <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: '18px' }} />
+        {/* Student Info Lines */}
+        <div style={{ marginBottom: '20px', fontSize: '12.5px', color: '#0a0a0a' }}>
+          <div style={{ marginBottom: '8px' }}>
+            Name: <span style={{ display: 'inline-block', width: '180px', borderBottom: '1px solid #000' }}>&nbsp;</span>
+          </div>
+          <div style={{ display: 'flex', gap: '32px' }}>
+            <div>
+              Roll Number: <span style={{ display: 'inline-block', width: '100px', borderBottom: '1px solid #000' }}>&nbsp;</span>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, minWidth: '150px' }}>
-                <span style={{ marginRight: '6px', fontWeight: '600' }}>Roll Number:</span>
-                <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: '18px' }} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', flex: 1, minWidth: '150px' }}>
-                <span style={{ marginRight: '6px', fontWeight: '600' }}>Class:</span>
-                <span style={{ borderBottom: '1px solid #000', minWidth: '36px', textAlign: 'center', fontWeight: '700' }}>
-                  {paper.className}
-                </span>
-                <span style={{ marginLeft: '12px', marginRight: '6px', fontWeight: '600' }}>Section:</span>
-                <div style={{ flex: 1, borderBottom: '1px solid #000', minHeight: '18px' }} />
-              </div>
+            <div>
+              Class: <span style={{ display: 'inline-block', width: '80px', borderBottom: '1px solid #000' }}>&nbsp;</span>
             </div>
           </div>
         </div>
 
-        {/* Question Sections */}
-        <div style={{ padding: '24px 0 12px' }}>
-          {paper.sections.map((section, si) => (
-            <div key={si} style={{ marginBottom: '32px' }}>
+        {/* Sections */}
+        {paper.sections.map((section, si) => {
+          let questionCounter = 0
+          for (let i = 0; i < si; i++) {
+            questionCounter += paper.sections[i].questions.length
+          }
 
-              {/* Section Header */}
-              <div style={{ marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
-                <h2 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
-                  {section.title}
-                </h2>
-                {section.instruction && (
-                  <p style={{ fontSize: '11.5px', color: 'var(--text-3)', fontStyle: 'italic', margin: '4px 0 0 0' }}>
-                    {section.instruction}
-                  </p>
-                )}
-              </div>
+          return (
+            <div key={si} style={{ marginBottom: '28px' }}>
+              {/* Section Title */}
+              <h2 style={{
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: '700',
+                color: '#0a0a0a',
+                margin: '0 0 4px 0',
+                fontFamily: 'inherit'
+              }}>
+                {section.title}
+              </h2>
+
+              {section.instruction && (
+                <p style={{ textAlign: 'center', fontSize: '12px', color: '#555', fontStyle: 'italic', margin: '0 0 14px 0' }}>
+                  {section.instruction}
+                </p>
+              )}
 
               {/* Questions */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {section.questions.map((q, qi) => {
-                  const ds = DIFFICULTY_STYLES[q.difficulty] || DIFFICULTY_STYLES.Easy
+                  const num = questionCounter + qi + 1
                   return (
                     <div
                       key={q.id}
                       style={{
                         display: 'flex',
-                        gap: '10px',
+                        gap: '8px',
                         fontSize: '12.5px',
-                        color: 'var(--text-1)',
-                        lineHeight: '1.6',
-                        alignItems: 'flex-start'
+                        color: '#1a1a1a',
+                        lineHeight: '1.65',
+                        alignItems: 'flex-start',
                       }}
                     >
-                      <span style={{ fontWeight: '700', minWidth: '20px', textAlign: 'right', flexShrink: 0, paddingTop: '1px' }}>
-                        {qi + 1}.
+                      <span style={{ fontWeight: '600', minWidth: '22px', flexShrink: 0 }}>
+                        {num}.
                       </span>
                       <div style={{ flex: 1 }}>
-                        <span>{q.text}</span>
-                        <span style={{ marginLeft: '10px', whiteSpace: 'nowrap' }}>
-                          {/* Difficulty badge */}
-                          <span
-                            className="no-print"
-                            style={{
-                              display: 'inline-block',
-                              padding: '1px 7px',
-                              borderRadius: '99px',
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              background: ds.bg,
-                              color: ds.color,
-                              border: `1px solid ${ds.border}`,
-                              marginRight: '6px',
-                              verticalAlign: 'middle'
-                            }}
-                          >
-                            {q.difficulty}
-                          </span>
-                          {/* Marks — shown in print too */}
-                          <strong style={{ fontSize: '11.5px', color: 'var(--text-3)' }}>
-                            [{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]
-                          </strong>
+                        {/* Difficulty inline */}
+                        <span style={{ fontWeight: '500' }}>
+                          [{q.difficulty}]{' '}
+                        </span>
+                        {q.text}
+                        <span style={{ color: '#555', fontWeight: '600', marginLeft: '8px', fontSize: '12px' }}>
+                          [{q.marks} {q.marks === 1 ? 'Mark' : 'Marks'}]
                         </span>
                       </div>
                     </div>
@@ -232,30 +202,26 @@ export default function OutputPage({ paper }: { paper: QuestionPaper }) {
                 })}
               </div>
             </div>
-          ))}
-        </div>
+          )
+        })}
 
         {/* End of Paper */}
-        <div style={{ textAlign: 'center', padding: '14px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: '28px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-3)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            *** End of Question Paper ***
+        <div style={{ textAlign: 'center', margin: '20px 0', paddingTop: '14px', borderTop: '1px solid #ccc' }}>
+          <span style={{ fontSize: '12px', fontWeight: '600', color: '#555', letterSpacing: '0.06em' }}>
+            End of Question Paper
           </span>
         </div>
 
-        {/* Collapsible Answer Key */}
+        {/* Answer Key — visible when toggled, hidden on print */}
         {paper.answerKey && paper.answerKey.length > 0 && showAnswerKey && (
-          <div className="no-print" style={{ borderTop: '2px dashed var(--border-strong)', paddingTop: '28px', marginTop: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
-                Answer Key
-              </span>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-            </div>
+          <div className="no-print" style={{ borderTop: '2px dashed #d4d4d8', paddingTop: '24px', marginTop: '24px' }}>
+            <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#0a0a0a', marginBottom: '14px', fontFamily: 'inherit' }}>
+              Answer Key:
+            </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {paper.answerKey.map((ak, idx) => (
-                <div key={ak.questionId} style={{ display: 'flex', gap: '10px', fontSize: '12px', color: 'var(--text-2)', lineHeight: '1.6', alignItems: 'flex-start' }}>
-                  <span style={{ fontWeight: '700', minWidth: '20px', textAlign: 'right', flexShrink: 0 }}>
+                <div key={ak.questionId} style={{ display: 'flex', gap: '8px', fontSize: '12.5px', color: '#333', lineHeight: '1.65', alignItems: 'flex-start' }}>
+                  <span style={{ fontWeight: '600', minWidth: '22px', flexShrink: 0 }}>
                     {idx + 1}.
                   </span>
                   <p style={{ margin: 0, flex: 1 }}>{ak.answer}</p>
@@ -264,6 +230,7 @@ export default function OutputPage({ paper }: { paper: QuestionPaper }) {
             </div>
           </div>
         )}
+
       </div>
     </div>
   )

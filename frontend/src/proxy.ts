@@ -1,0 +1,26 @@
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+
+// Protect all internal dashboard routes
+const isProtectedRoute = createRouteMatcher([
+  '/home(.*)',
+  '/assignments(.*)',
+  '/settings(.*)',
+  '/groups(.*)',
+  '/toolkit(.*)',
+  '/library(.*)'
+])
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) {
+    auth().protect()
+  }
+})
+
+export const config = {
+  matcher: [
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for Clerk's auto-proxy path
+    '/__clerk/(.*)',
+    '/(api|trpc)(.*)',
+  ],
+}

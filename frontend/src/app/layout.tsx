@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Sidebar from '@/components/layout/Sidebar'
-import MobileNavigation from '@/components/layout/MobileNavigation'
+import { ClerkProvider } from "@clerk/nextjs"
 
 export const metadata: Metadata = {
   title: 'VedaAI – AI Assessment Platform',
@@ -12,13 +11,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="app-shell">
-          <Sidebar />
-          <MobileNavigation />
-          <div className="main-content">
-            {children}
-          </div>
-        </div>
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   )

@@ -126,14 +126,70 @@ export default function HomePage() {
                 ))}
               </div>
             ) : recent.length === 0 ? (
-              <div className="empty" style={{ padding: '48px 24px' }}>
-                <div className="empty-icon-wrap">
-                  <BookOpen size={22} style={{ color: 'var(--text-4)' }} />
+              <div style={{ padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                    {/* SVG Illustration of Document */}
+                    <svg width="84" height="84" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.85 }}>
+                      <rect x="25" y="10" width="50" height="70" rx="8" fill="#f4f4f5" stroke="#e4e4e7" strokeWidth="2.5"/>
+                      <line x1="38" y1="26" x2="62" y2="26" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                      <line x1="38" y1="36" x2="54" y2="36" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                      <line x1="38" y1="46" x2="58" y2="46" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                      <line x1="38" y1="56" x2="48" y2="56" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
+                    </svg>
+                    {/* Magnifying Glass with Red X */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '10px',
+                      right: '10px',
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '50%',
+                      background: '#ffffff',
+                      border: '3px solid #09090b',
+                      boxShadow: '0 6px 14px rgba(0,0,0,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {/* Red X icon */}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </div>
+                    {/* Magnifier Handle */}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '2px',
+                      right: '2px',
+                      width: '14px',
+                      height: '6px',
+                      background: '#09090b',
+                      transform: 'rotate(45deg)',
+                      borderRadius: '2px'
+                    }} />
+                  </div>
                 </div>
-                <div className="empty-title">No assignments yet</div>
-                <div className="empty-desc">Create your first AI-powered question paper to get started</div>
-                <Link href="/assignments/create" className="btn btn-black">
-                  <Plus size={13} /> Create Assignment
+                
+                <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)', marginBottom: '8px', textAlign: 'center' }}>
+                  No assignments yet
+                </h2>
+                <p style={{ fontSize: '12px', color: 'var(--text-3)', maxWidth: '380px', lineHeight: '1.6', textAlign: 'center', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
+                  Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
+                </p>
+                
+                <Link 
+                  href="/assignments/create" 
+                  className="btn btn-black"
+                  style={{ 
+                    borderRadius: '99px',
+                    padding: '8px 20px',
+                    fontSize: '12.5px',
+                    fontWeight: '600'
+                  }}
+                >
+                  <Plus size={14} /> Create Your First Assignment
                 </Link>
               </div>
             ) : (
