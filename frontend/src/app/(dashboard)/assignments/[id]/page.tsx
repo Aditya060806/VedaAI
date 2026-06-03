@@ -231,26 +231,18 @@ export default function AssignmentDetailPage() {
             <span style={{ position: 'absolute', top: 6, right: 6, width: 6, height: 6, borderRadius: '50%', background: '#ea580c' }} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-            <div 
-              style={{ 
-                width: '26px', 
-                height: '26px', 
-                borderRadius: '50%', 
-                background: 'linear-gradient(135deg, #fef08a, #fde047)',
-                border: '1px solid var(--border-strong)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '9px',
-                fontWeight: '700',
-                color: '#854d0e'
-              }}
-            >
-              JD
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 10px 4px 5px', background: '#ffffff', border: '1px solid var(--border)', borderRadius: '99px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+              <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="19" cy="19" r="19" fill="#fcd9b6" />
+                <circle cx="19" cy="15.5" r="6" fill="#8a5a3c" />
+                <path d="M7.5 33 C 8.5 25, 14 22.5, 19 22.5 C 24 22.5, 29.5 25, 30.5 33 Z" fill="#5b3a26" />
+                <circle cx="19" cy="16" r="5" fill="#f4b183" />
+                <path d="M13.5 14 C 14 10.5, 17 9, 19 9 C 21 9, 24 10.5, 24.5 14 C 24.5 12, 23 11, 19 11 C 15 11, 13.5 12, 13.5 14 Z" fill="#5b3a26" />
+              </svg>
             </div>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>John Doe</span>
-            <ChevronDown size={11} style={{ color: 'var(--text-4)' }} />
+            <span style={{ fontSize: '12.5px', fontWeight: '600', color: 'var(--text-1)' }}>John Doe</span>
+            <ChevronDown size={12} style={{ color: 'var(--text-3)' }} />
           </div>
         </div>
       </div>

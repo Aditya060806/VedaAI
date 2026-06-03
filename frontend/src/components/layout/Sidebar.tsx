@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { useAssignmentStore } from '@/store'
 import Image from 'next/image'
-import { Show, UserButton, SignInButton } from '@clerk/nextjs'
+import { Show, UserButton } from '@clerk/nextjs'
 
 const navItems = [
   { icon: Home,     label: 'Home',                 href: '/home' },
@@ -96,37 +96,41 @@ export default function Sidebar() {
           Settings
         </Link>
 
-        {/* School Card / Clerk Auth Area */}
+        {/* School Card — always visible (matches design) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: 10,
-          padding: '10px 12px',
-          borderRadius: '12px',
+          padding: '8px 10px',
+          borderRadius: '14px',
           background: 'var(--surface-2)',
+          border: '1px solid var(--border)',
         }}>
-          <Show when="signed-out">
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-              <SignInButton mode="modal">
-                <button className="btn-black" style={{ width: '100%', padding: '8px 0', fontSize: '12px', borderRadius: '8px', cursor: 'pointer', border: 'none', fontWeight: '600', color: 'white' }}>
-                  Sign In
-                </button>
-              </SignInButton>
+          {/* Avatar */}
+          <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Show when="signed-in">
+              <UserButton appearance={{ elements: { userButtonAvatarBox: { width: 38, height: 38 } } }} />
+            </Show>
+            <Show when="signed-out">
+              <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="19" cy="19" r="19" fill="#fcd9b6" />
+                <circle cx="19" cy="15.5" r="6" fill="#8a5a3c" />
+                <path d="M7.5 33 C 8.5 25, 14 22.5, 19 22.5 C 24 22.5, 29.5 25, 30.5 33 Z" fill="#5b3a26" />
+                <circle cx="19" cy="16" r="5" fill="#f4b183" />
+                <path d="M13.5 14 C 14 10.5, 17 9, 19 9 C 21 9, 24 10.5, 24.5 14 C 24.5 12, 23 11, 19 11 C 15 11, 13.5 12, 13.5 14 Z" fill="#5b3a26" />
+              </svg>
+            </Show>
+          </div>
+
+          {/* School name */}
+          <div style={{ flex: 1, minWidth: 0, cursor: 'default' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.3' }}>
+              Delhi Public School
             </div>
-          </Show>
-          <Show when="signed-in">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, flexShrink: 0 }}>
-              <UserButton appearance={{ elements: { userButtonAvatarBox: { width: 34, height: 34 } } }} />
+            <div style={{ fontSize: '10.5px', color: 'var(--text-4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
+              Bokaro Steel City
             </div>
-            <div style={{ flex: 1, minWidth: 0, cursor: 'default' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: '1.3' }}>
-                Delhi Public School
-              </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '1px' }}>
-                Bokaro Steel City
-              </div>
-            </div>
-          </Show>
+          </div>
         </div>
       </div>
     </aside>
