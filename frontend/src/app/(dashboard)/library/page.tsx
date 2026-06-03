@@ -21,7 +21,7 @@ export default function LibraryPage() {
       <div className="flex-1 p-6 overflow-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -29,13 +29,13 @@ export default function LibraryPage() {
             </div>
             <p className="text-xs text-gray-500 ml-4">All your saved question papers and resources.</p>
           </div>
-          <button className="btn-primary opacity-60 cursor-not-allowed" disabled>
+          <button className="btn-primary opacity-60 cursor-not-allowed self-start sm:self-auto" disabled>
             <Plus size={14} /> Save New
           </button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {stats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="card p-4 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">

@@ -962,6 +962,12 @@
     gap: 10px !important;
   }
 
+  /* Toolkit page: 3-col stats → 1 col */
+  .stats-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
   /* Home page: two-column content → single column */
   .home-two-col {
     grid-template-columns: 1fr !important;

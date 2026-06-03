@@ -66,7 +66,7 @@ export default function ToolkitPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div className="stats-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
           {[
             { label: 'Tools Available', value: '6', sub: '1 active now' },
             { label: 'AI Generations', value: '24+', sub: 'All time' },
