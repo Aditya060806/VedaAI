@@ -247,9 +247,9 @@ export default function AssignmentDetailPage() {
                 color: '#854d0e'
               }}
             >
-              AP
+              JD
             </div>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>Aditya Pandey</span>
+            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>John Doe</span>
             <ChevronDown size={11} style={{ color: 'var(--text-4)' }} />
           </div>
         </div>

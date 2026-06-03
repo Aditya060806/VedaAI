@@ -168,9 +168,9 @@ export default function AssignmentsPage() {
                 color: '#854d0e'
               }}
             >
-              AP
+              JD
             </div>
-            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>Aditya Pandey</span>
+            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>John Doe</span>
             <ChevronDown size={11} style={{ color: 'var(--text-4)' }} />
           </div>
         </div>
@@ -267,48 +267,38 @@ export default function AssignmentsPage() {
           /* Slide 4 High Fidelity Magnifier-X Empty State */
           <div style={{ padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
-              <div style={{ position: 'relative', width: '100px', height: '100px' }}>
-                {/* SVG Illustration of Document */}
-                <svg width="84" height="84" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.85 }}>
-                  <rect x="25" y="10" width="50" height="70" rx="8" fill="#f4f4f5" stroke="#e4e4e7" strokeWidth="2.5"/>
-                  <line x1="38" y1="26" x2="62" y2="26" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
-                  <line x1="38" y1="36" x2="54" y2="36" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
-                  <line x1="38" y1="46" x2="58" y2="46" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
-                  <line x1="38" y1="56" x2="48" y2="56" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round"/>
-                </svg>
-                {/* Magnifying Glass with Red X */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '10px',
-                  right: '10px',
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '50%',
-                  background: '#ffffff',
-                  border: '3px solid #09090b',
-                  boxShadow: '0 6px 14px rgba(0,0,0,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {/* Red X icon */}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </div>
-                {/* Magnifier Handle */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '2px',
-                  right: '2px',
-                  width: '14px',
-                  height: '6px',
-                  background: '#09090b',
-                  transform: 'rotate(45deg)',
-                  borderRadius: '2px'
-                }} />
-              </div>
+              <svg width="200" height="176" viewBox="0 0 200 176" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Soft circular backdrop */}
+                <circle cx="100" cy="88" r="62" fill="#f4f4f5" />
+
+                {/* Decorative squiggle (top-left) */}
+                <path d="M50 42 C 41 35, 42 24, 51 21 C 60 18, 60 9, 53 5" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+                {/* Comment / speech bubble (top-right) */}
+                <rect x="120" y="30" width="28" height="18" rx="6" fill="#e8e8eb" />
+                <rect x="126" y="37" width="15" height="3" rx="1.5" fill="#b4b4bb" />
+
+                {/* Document */}
+                <rect x="68" y="36" width="64" height="84" rx="9" fill="#ffffff" stroke="#e4e4e7" strokeWidth="2.5" />
+                <rect x="80" y="50" width="34" height="8" rx="4" fill="#18181b" />
+                <rect x="80" y="68" width="40" height="4" rx="2" fill="#e4e4e7" />
+                <rect x="80" y="79" width="32" height="4" rx="2" fill="#e4e4e7" />
+                <rect x="80" y="90" width="38" height="4" rx="2" fill="#e4e4e7" />
+                <rect x="80" y="101" width="22" height="4" rx="2" fill="#e4e4e7" />
+
+                {/* Magnifying glass — handle drawn first so the ring overlaps it */}
+                <line x1="127" y1="123" x2="140" y2="136" stroke="#18181b" strokeWidth="7" strokeLinecap="round" />
+                <circle cx="112" cy="108" r="21" fill="#ffffff" stroke="#18181b" strokeWidth="5.5" />
+                <line x1="104" y1="100" x2="120" y2="116" stroke="#dc2626" strokeWidth="4.5" strokeLinecap="round" />
+                <line x1="120" y1="100" x2="104" y2="116" stroke="#dc2626" strokeWidth="4.5" strokeLinecap="round" />
+
+                {/* Sparkle (bottom-left) */}
+                <path d="M60 104 L63.5 112.5 L72 116 L63.5 119.5 L60 128 L56.5 119.5 L48 116 L56.5 112.5 Z" fill="#a1a1aa" />
+
+                {/* Accent dots */}
+                <circle cx="153" cy="92" r="4.5" fill="#3b82f6" />
+                <circle cx="150" cy="132" r="3" fill="#18181b" />
+              </svg>
             </div>
             
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)', marginBottom: '8px', textAlign: 'center' }}>

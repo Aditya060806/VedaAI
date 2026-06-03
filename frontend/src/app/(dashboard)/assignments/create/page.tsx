@@ -122,7 +122,7 @@ export default function CreateAssignmentPage() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
             <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(135deg,#fef08a,#fde047)', border: '1px solid var(--border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: '700', color: '#854d0e' }}>
-              AP
+              JD
             </div>
             <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-2)' }}>John Doe</span>
             <ChevronDown size={11} style={{ color: 'var(--text-4)' }} />
