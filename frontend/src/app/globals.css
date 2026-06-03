@@ -740,15 +740,20 @@
   /* Mobile Layout Additions */
   .mobile-header {
     display: none;
-    height: 52px;
+    height: 56px;
     background: #ffffff;
     border-bottom: 1px solid var(--border);
     align-items: center;
     justify-content: space-between;
     padding: 0 16px;
-    position: sticky;
+    /* Fixed so it always covers full viewport width regardless of sidebar */
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 200;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
   }
   .mobile-bottom-nav {
     display: none;
@@ -802,73 +807,85 @@
   }
 
   @media (max-width: 767px) {
-    /* Hide desktop chrome */
-    .sidebar, .topbar { display: none !important; }
-    
-    /* Enable mobile chrome */
+    /* Override sidebar width variable so any consumer (floating areas etc) collapses to 0 */
+    :root {
+      --sidebar-w: 0px;
+    }
+
+    /* ── Sidebar: remove from flex flow entirely ── */
+    .sidebar {
+      display: none !important;
+      width: 0 !important;
+      min-width: 0 !important;
+      flex-shrink: 1 !important;
+    }
+
+    /* ── Desktop topbar: hidden ── */
+    .topbar { display: none !important; }
+
+    /* ── App shell: single column, full width ── */
+    .app-shell {
+      flex-direction: column !important;
+    }
+
+    /* ── Main content: full viewport width ── */
+    .main-content {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    /* ── Enable mobile chrome ── */
     .mobile-header, .mobile-bottom-nav, .mobile-fab { display: flex !important; }
-    
-    /* Hide the floating create pill on mobile (we have FAB) */
-    .floating-pill-create { display: none !important; }
 
-    /* Page Body */
+    /* ── Hide desktop-only elements ── */
+    .floating-pill-create, .desktop-only { display: none !important; }
+
+    /* ── Page body: account for fixed header (56px) + bottom nav ── */
     .page-body {
-      padding: 16px 16px 140px !important; /* Ensure enough space above bottom nav */
-      background: #cfcfd1 !important; /* Slightly darker grey background on mobile */
-      min-height: 100vh;
-    }
-    
-    /* Mobile Header Styling (floating rounded pill) */
-    .mobile-header {
-      margin: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      top: 12px;
-      background: #ffffff;
-      height: 56px !important;
+      padding: 80px 16px 120px !important;
+      background: var(--surface-2) !important;
+      overflow-y: auto;
+      flex: 1;
     }
 
-    /* Target specific cards on mobile for tighter padding and rounded corners */
+    /* ── Cards: tighter, rounder on mobile ── */
     .card-mobile-tight {
-      padding: 24px 20px !important;
-      border-radius: 24px !important;
+      padding: 20px 16px !important;
+      border-radius: 16px !important;
     }
 
-    /* Sub-header styles for mobile (<- Create Assignment) */
+    /* ── Mobile sub-header (back arrow + page title) ── */
     .mobile-sub-header {
       display: flex !important;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 24px;
-      margin-top: 12px;
-    }
-    
-    /* Search and Filter row for Assignments Page */
-    .mobile-search-row {
-      flex-direction: row !important;
-      gap: 12px !important;
-      align-items: center !important;
-    }
-    .mobile-search-row > div:first-child {
-      flex: 0 0 100px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    /* Paper output container mobile padding */
+    /* ── Search/filter row ── */
+    .mobile-search-row {
+      flex-direction: row !important;
+      gap: 10px !important;
+      align-items: center !important;
+    }
+
+    /* ── Paper output ── */
     .mobile-paper-container {
-      padding: 24px 16px !important;
-      border-radius: 16px !important;
+      padding: 20px 14px !important;
+      border-radius: 12px !important;
     }
-    
-    /* Bottom buttons row */
+
+    /* ── Footer action buttons ── */
     .mobile-footer-buttons {
-      justify-content: center !important;
-      gap: 16px !important;
-      padding-bottom: 20px !important;
+      justify-content: stretch !important;
+      gap: 12px !important;
+      flex-direction: column !important;
+      padding-bottom: 16px !important;
     }
-    
-    /* Hide certain desktop elements */
-    .desktop-only { display: none !important; }
+    .mobile-footer-buttons > * {
+      width: 100% !important;
+      justify-content: center !important;
+    }
   }
 }
 
@@ -923,7 +940,8 @@
 /* ─────────────────────────────────────────────
    RESPONSIVE UTILITIES
 ───────────────────────────────────────────── */
-@media (max-width: 600px) {
+@media (max-width: 767px) {
+  /* Stack any flex/grid row that doesn't explicitly override */
   .responsive-qt-row {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -932,9 +950,48 @@
     width: 100% !important;
     min-width: 0 !important;
   }
+
   /* Stack two-column create form on mobile */
   .create-form-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Home page: 4-col stats → 2×2 grid */
+  .stats-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Home page: two-column content → single column */
+  .home-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* Library/Toolkit tab rows → wrap */
+  .tab-row {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  /* Assignments card grid → single column */
+  .assignments-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Any 2-column grid → single */
+  .grid-2-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Hide right-panel elements (quick-actions sidebar) on mobile */
+  .home-right-panel {
+    display: none !important;
+  }
+
+  /* Fix floating-bottom-area that references sidebar width */
+  .floating-bottom-area {
+    left: 0 !important;
   }
 }
 

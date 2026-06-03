@@ -75,7 +75,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
+        <div className="stats-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 }}>
           {[
             { label: 'Total',      value: total,     icon: BookOpen,      sub: 'All time' },
             { label: 'Completed',  value: completed,  icon: CheckCircle,   sub: `${rate}% rate` },
@@ -99,7 +99,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20 }}>
+        <div className="home-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 20 }}>
 
           {/* Recent assignments */}
           <div className="card">
@@ -231,7 +231,7 @@ export default function HomePage() {
           </div>
 
           {/* Right panel */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="home-right-panel" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
             {/* Quick actions */}
             <div className="card">

@@ -376,7 +376,7 @@ export default function AssignmentsPage() {
         {/* Slide 2 Bottom Floating + Create Assignment Capsule */}
         {!loading && filtered.length > 0 && (
           <>
-            <div className="no-print floating-bottom-area" style={{ position: 'fixed', bottom: 0, left: '260px', right: 0, height: '120px', background: 'linear-gradient(to bottom, transparent, var(--surface) 80%)', pointerEvents: 'none', zIndex: 90 }} />
+            <div className="no-print floating-bottom-area" style={{ position: 'fixed', bottom: 0, left: 'var(--sidebar-w, 260px)', right: 0, height: '120px', background: 'linear-gradient(to bottom, transparent, var(--surface) 80%)', pointerEvents: 'none', zIndex: 90 }} />
             <Link 
               href="/assignments/create" 
               className="btn-pill-glow floating-pill-create no-print"
