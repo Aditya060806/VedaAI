@@ -185,67 +185,72 @@ export default function AssignmentsPage() {
           <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)' }}>Assignments</span>
         </div>
 
-        {/* Title Header with green dot */}
-        <div className="desktop-only" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', flexShrink: 0 }} />
-            <h1 className="page-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
-              Assignments
-            </h1>
-          </div>
-          <p className="page-desc" style={{ fontSize: '12.5px', color: 'var(--text-3)', marginTop: '4px' }}>
-            Manage and create assignments for your classes
-          </p>
-        </div>
+        {/* Title Header + Search row — hidden in the true empty (0) state to match design */}
+        {(loading || assignments.length > 0) && (
+          <>
+            {/* Title Header with green dot */}
+            <div className="desktop-only" style={{ marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', flexShrink: 0 }} />
+                <h1 className="page-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
+                  Assignments
+                </h1>
+              </div>
+              <p className="page-desc" style={{ fontSize: '12.5px', color: 'var(--text-3)', marginTop: '4px' }}>
+                Manage and create assignments for your classes
+              </p>
+            </div>
 
-        {/* Search & Filter Row */}
-        <div className="mobile-search-row" style={{ display: 'flex', gap: '16px', marginBottom: '28px', alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <Filter size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
-            <select
-              className="input"
-              value={status}
-              onChange={e => setStatus(e.target.value as Status)}
-              style={{
-                appearance: 'none',
-                padding: '10px 36px 10px 40px',
-                fontSize: '13px',
-                fontWeight: '600',
-                borderRadius: '99px',
-                border: '1px solid var(--border)',
-                background: '#ffffff',
-                color: 'var(--text-3)',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-              }}
-            >
-              <option value="all">Filter By</option>
-              <option value="completed">Completed</option>
-              <option value="processing">Processing</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
-          </div>
+            {/* Search & Filter Row */}
+            <div className="mobile-search-row" style={{ display: 'flex', gap: '16px', marginBottom: '28px', alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <Filter size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
+                <select
+                  className="input"
+                  value={status}
+                  onChange={e => setStatus(e.target.value as Status)}
+                  style={{
+                    appearance: 'none',
+                    padding: '10px 36px 10px 40px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    borderRadius: '99px',
+                    border: '1px solid var(--border)',
+                    background: '#ffffff',
+                    color: 'var(--text-3)',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                  }}
+                >
+                  <option value="all">Filter By</option>
+                  <option value="completed">Completed</option>
+                  <option value="processing">Processing</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
 
-          <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
-            <Search size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
-            <input
-              className="input"
-              placeholder="Search Assignment"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{
-                padding: '10px 16px 10px 40px',
-                fontSize: '13px',
-                fontWeight: '500',
-                borderRadius: '99px',
-                border: '1px solid var(--border)',
-                background: '#ffffff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-              }}
-            />
-          </div>
-        </div>
+              <div className="search-bar" style={{ flex: 1, position: 'relative' }}>
+                <Search size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)' }} />
+                <input
+                  className="input"
+                  placeholder="Search Assignment"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  style={{
+                    padding: '10px 16px 10px 40px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    borderRadius: '99px',
+                    border: '1px solid var(--border)',
+                    background: '#ffffff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Main Content Area */}
         {loading ? (
@@ -264,47 +269,63 @@ export default function AssignmentsPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          /* Slide 4 High Fidelity Magnifier-X Empty State */
-          <div style={{ padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'center' }}>
-              <svg width="200" height="176" viewBox="0 0 200 176" fill="none" xmlns="http://www.w3.org/2000/svg">
+          /* High Fidelity Magnifier-X Empty State — centered in content area */
+          <div style={{ minHeight: 'calc(100vh - 200px)', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>
+              <svg width="280" height="240" viewBox="0 0 280 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="emptyBackdrop" cx="50%" cy="42%" r="58%">
+                    <stop offset="0%" stopColor="#efeff1" />
+                    <stop offset="70%" stopColor="#f1f1f3" />
+                    <stop offset="100%" stopColor="#fafafa" stopOpacity="0" />
+                  </radialGradient>
+                  <filter id="docShadow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#000000" floodOpacity="0.06" />
+                  </filter>
+                </defs>
+
                 {/* Soft circular backdrop */}
-                <circle cx="100" cy="88" r="62" fill="#f4f4f5" />
+                <circle cx="140" cy="104" r="92" fill="url(#emptyBackdrop)" />
 
                 {/* Decorative squiggle (top-left) */}
-                <path d="M50 42 C 41 35, 42 24, 51 21 C 60 18, 60 9, 53 5" stroke="#d4d4d8" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                <path d="M70 64 C 56 52, 58 33, 73 29 C 88 25, 88 11, 76 3" stroke="#3f3f46" strokeWidth="2.6" strokeLinecap="round" fill="none" />
 
-                {/* Comment / speech bubble (top-right) */}
-                <rect x="120" y="30" width="28" height="18" rx="6" fill="#e8e8eb" />
-                <rect x="126" y="37" width="15" height="3" rx="1.5" fill="#b4b4bb" />
+                {/* Comment / tag bubble (top-right) */}
+                <rect x="178" y="40" width="44" height="28" rx="9" fill="#e6e6e9" />
+                <rect x="188" y="52" width="24" height="4.5" rx="2.25" fill="#3f3f46" />
 
                 {/* Document */}
-                <rect x="68" y="36" width="64" height="84" rx="9" fill="#ffffff" stroke="#e4e4e7" strokeWidth="2.5" />
-                <rect x="80" y="50" width="34" height="8" rx="4" fill="#18181b" />
-                <rect x="80" y="68" width="40" height="4" rx="2" fill="#e4e4e7" />
-                <rect x="80" y="79" width="32" height="4" rx="2" fill="#e4e4e7" />
-                <rect x="80" y="90" width="38" height="4" rx="2" fill="#e4e4e7" />
-                <rect x="80" y="101" width="22" height="4" rx="2" fill="#e4e4e7" />
+                <g filter="url(#docShadow)">
+                  <rect x="98" y="48" width="84" height="112" rx="12" fill="#ffffff" />
+                </g>
+                <rect x="114" y="68" width="44" height="10" rx="5" fill="#18181b" />
+                <rect x="114" y="92" width="52" height="5" rx="2.5" fill="#e1e1e4" />
+                <rect x="114" y="106" width="42" height="5" rx="2.5" fill="#e1e1e4" />
+                <rect x="114" y="120" width="50" height="5" rx="2.5" fill="#e1e1e4" />
+                <rect x="114" y="134" width="30" height="5" rx="2.5" fill="#e1e1e4" />
 
-                {/* Magnifying glass — handle drawn first so the ring overlaps it */}
-                <line x1="127" y1="123" x2="140" y2="136" stroke="#18181b" strokeWidth="7" strokeLinecap="round" />
-                <circle cx="112" cy="108" r="21" fill="#ffffff" stroke="#18181b" strokeWidth="5.5" />
-                <line x1="104" y1="100" x2="120" y2="116" stroke="#dc2626" strokeWidth="4.5" strokeLinecap="round" />
-                <line x1="120" y1="100" x2="104" y2="116" stroke="#dc2626" strokeWidth="4.5" strokeLinecap="round" />
+                {/* Magnifying glass — handle first, lavender ring overlaps */}
+                <line x1="172" y1="162" x2="192" y2="182" stroke="#b7b4dd" strokeWidth="11" strokeLinecap="round" />
+                <line x1="172" y1="162" x2="192" y2="182" stroke="#9d99cf" strokeWidth="5" strokeLinecap="round" />
+                <circle cx="150" cy="140" r="30" fill="#ffffff" />
+                <circle cx="150" cy="140" r="30" fill="#a5a0d6" fillOpacity="0.16" />
+                <circle cx="150" cy="140" r="30" stroke="#b7b4dd" strokeWidth="8" />
+                {/* Red X */}
+                <line x1="138" y1="128" x2="162" y2="152" stroke="#e53935" strokeWidth="7" strokeLinecap="round" />
+                <line x1="162" y1="128" x2="138" y2="152" stroke="#e53935" strokeWidth="7" strokeLinecap="round" />
 
                 {/* Sparkle (bottom-left) */}
-                <path d="M60 104 L63.5 112.5 L72 116 L63.5 119.5 L60 128 L56.5 119.5 L48 116 L56.5 112.5 Z" fill="#a1a1aa" />
+                <path d="M84 146 L88.5 156.5 L99 161 L88.5 165.5 L84 176 L79.5 165.5 L69 161 L79.5 156.5 Z" fill="#60a5fa" />
 
                 {/* Accent dots */}
-                <circle cx="153" cy="92" r="4.5" fill="#3b82f6" />
-                <circle cx="150" cy="132" r="3" fill="#18181b" />
+                <circle cx="214" cy="120" r="5" fill="#3b82f6" />
               </svg>
             </div>
             
-            <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)', marginBottom: '8px', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--text-1)', marginBottom: '10px', textAlign: 'center', letterSpacing: '-0.01em' }}>
               No assignments yet
             </h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-3)', maxWidth: '380px', lineHeight: '1.6', textAlign: 'center', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-3)', maxWidth: '360px', lineHeight: '1.65', textAlign: 'center', marginBottom: '24px', marginLeft: 'auto', marginRight: 'auto' }}>
               Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
             </p>
             
@@ -313,12 +334,12 @@ export default function AssignmentsPage() {
               className="btn btn-black"
               style={{ 
                 borderRadius: '99px',
-                padding: '8px 20px',
-                fontSize: '12.5px',
+                padding: '11px 22px',
+                fontSize: '13px',
                 fontWeight: '600'
               }}
             >
-              <Plus size={14} /> Create Your First Assignment
+              <Plus size={15} /> Create Your First Assignment
             </Link>
           </div>
         ) : (
