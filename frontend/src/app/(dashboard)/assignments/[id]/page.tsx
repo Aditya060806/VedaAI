@@ -178,7 +178,7 @@ export default function AssignmentDetailPage() {
     <>
       {/* High-Fidelity Header Navigation */}
       <div 
-        className="no-print" 
+        className="no-print desktop-only" 
         style={{ 
           height: '52px', 
           borderBottom: '1px solid var(--border)', 
@@ -270,7 +270,17 @@ export default function AssignmentDetailPage() {
 
       {/* Content */}
       {paper ? (
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="page-body" style={{ flex: 1, overflowY: 'auto' }}>
+          {/* Mobile sub-header (hidden on desktop) */}
+          <div className="mobile-sub-header" style={{ display: 'none', padding: '0 20px' }}>
+            <button onClick={() => router.push('/assignments')} className="btn-ghost" style={{ width: 32, height: 32, padding: 0, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ArrowLeft size={16} />
+            </button>
+            <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)' }}>
+              {assignment?.title || 'Assignment Detail'}
+            </span>
+          </div>
+
           <OutputPage paper={paper} />
         </div>
       ) : assignment?.status === 'failed' ? (

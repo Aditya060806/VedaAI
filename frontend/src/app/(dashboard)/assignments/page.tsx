@@ -111,7 +111,7 @@ export default function AssignmentsPage() {
     <>
       {/* High-Fidelity Header Navigation */}
       <div 
-        className="no-print" 
+        className="no-print desktop-only" 
         style={{ 
           height: '52px', 
           borderBottom: '1px solid var(--border)', 
@@ -177,8 +177,16 @@ export default function AssignmentsPage() {
       </div>
 
       <div className="page-body">
+        {/* Mobile sub-header (hidden on desktop) */}
+        <div className="mobile-sub-header" style={{ display: 'none' }}>
+          <button onClick={() => router.push('/home')} className="btn-ghost" style={{ width: 32, height: 32, padding: 0, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ArrowLeft size={16} />
+          </button>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)' }}>Assignments</span>
+        </div>
+
         {/* Title Header with green dot */}
-        <div style={{ marginBottom: '24px' }}>
+        <div className="desktop-only" style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-green)', flexShrink: 0 }} />
             <h1 className="page-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
@@ -191,7 +199,7 @@ export default function AssignmentsPage() {
         </div>
 
         {/* Search & Filter Row */}
-        <div className="desktop-search-row" style={{ display: 'flex', gap: '16px', marginBottom: '28px', alignItems: 'center' }}>
+        <div className="mobile-search-row" style={{ display: 'flex', gap: '16px', marginBottom: '28px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
             <Filter size={14} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-4)', pointerEvents: 'none' }} />
             <select

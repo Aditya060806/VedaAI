@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, BookOpen, Library, Sparkles, Bell, Plus } from 'lucide-react'
+import { Home, BookOpen, Library, Sparkles, Bell, Plus, Menu } from 'lucide-react'
 
 import Image from 'next/image'
 
@@ -22,7 +22,7 @@ export default function MobileNavigation() {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="mobile-header">
+      <header className="mobile-header no-print">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: 24, height: 24, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
             <Image src="/logo.png" alt="VedaAI Logo" width={24} height={24} style={{ transform: 'scale(1.35)', transformOrigin: 'center' }} />
@@ -52,16 +52,20 @@ export default function MobileNavigation() {
           >
             AP
           </div>
+
+          <button style={{ background: 'none', border: 'none', padding: 0, color: 'var(--text-1)', marginLeft: '4px' }}>
+            <Menu size={18} />
+          </button>
         </div>
       </header>
 
       {/* Floating Action Button */}
-      <Link href="/assignments/create" className="mobile-fab">
+      <Link href="/assignments/create" className="mobile-fab no-print">
         <Plus size={22} color="#ea580c" strokeWidth={3} />
       </Link>
 
       {/* Floating Pill Mobile Navigation */}
-      <nav className="mobile-bottom-nav">
+      <nav className="mobile-bottom-nav no-print">
         {navItems.map(({ icon: Icon, label, href }) => {
           const active = isActive(href)
           return (

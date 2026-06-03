@@ -92,7 +92,7 @@ export default function CreateAssignmentPage() {
     <>
       {/* Topbar */}
       <div
-        className="no-print"
+        className="no-print desktop-only"
         style={{
           height: '52px',
           borderBottom: '1px solid var(--border)',
@@ -133,8 +133,16 @@ export default function CreateAssignmentPage() {
       {/* Page body — fills content area */}
       <div className="page-body" style={{ paddingTop: 24 }}>
 
+        {/* Mobile sub-header (hidden on desktop) */}
+        <div className="mobile-sub-header" style={{ display: 'none' }}>
+          <button onClick={() => router.push('/assignments')} className="btn-ghost" style={{ width: 32, height: 32, padding: 0, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ArrowLeft size={16} />
+          </button>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)' }}>Create Assignment</span>
+        </div>
+
         {/* Title */}
-        <div style={{ marginBottom: 8 }}>
+        <div className="desktop-only" style={{ marginBottom: 8 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
             <h1 style={{ margin: 0, fontSize: '18px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-1)' }}>
@@ -147,14 +155,14 @@ export default function CreateAssignmentPage() {
         </div>
 
         {/* Step bar */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+        <div className="desktop-only" style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
           <div style={{ width: 200, height: 3, background: 'var(--surface-3)', borderRadius: 2, overflow: 'hidden' }}>
             <div style={{ width: '50%', height: '100%', background: '#09090b' }} />
           </div>
         </div>
 
         {/* Card */}
-        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, padding: '32px 36px', boxShadow: '0 4px 24px rgba(0,0,0,0.04)', marginBottom: 28 }}>
+        <div className="card-mobile-tight" style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, padding: '32px 36px', boxShadow: '0 4px 24px rgba(0,0,0,0.04)', marginBottom: 28 }}>
 
           <div style={{ marginBottom: 28 }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-1)', margin: 0 }}>Assignment Details</h2>
@@ -392,7 +400,7 @@ export default function CreateAssignmentPage() {
         )}
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 48 }}>
+        <div className="mobile-footer-buttons" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 48 }}>
           <button
             onClick={() => router.back()}
             className="btn btn-outline"

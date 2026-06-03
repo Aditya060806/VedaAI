@@ -802,27 +802,73 @@
   }
 
   @media (max-width: 767px) {
-    .sidebar {
-      display: none !important;
-    }
-    .topbar {
-      display: none !important;
-    }
-    .mobile-header {
-      display: flex !important;
-    }
-    .mobile-bottom-nav {
-      display: flex !important;
-    }
-    .mobile-fab {
-      display: flex !important;
-    }
+    /* Hide desktop chrome */
+    .sidebar, .topbar { display: none !important; }
+    
+    /* Enable mobile chrome */
+    .mobile-header, .mobile-bottom-nav, .mobile-fab { display: flex !important; }
+    
+    /* Hide the floating create pill on mobile (we have FAB) */
+    .floating-pill-create { display: none !important; }
+
+    /* Page Body */
     .page-body {
-      padding: 16px 16px 110px !important;
+      padding: 16px 16px 140px !important; /* Ensure enough space above bottom nav */
+      background: #cfcfd1 !important; /* Slightly darker grey background on mobile */
+      min-height: 100vh;
     }
-    .floating-pill-create {
-      display: none !important; /* Hide desktop pill on mobile */
+    
+    /* Mobile Header Styling (floating rounded pill) */
+    .mobile-header {
+      margin: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      top: 12px;
+      background: #ffffff;
+      height: 56px !important;
     }
+
+    /* Target specific cards on mobile for tighter padding and rounded corners */
+    .card-mobile-tight {
+      padding: 24px 20px !important;
+      border-radius: 24px !important;
+    }
+
+    /* Sub-header styles for mobile (<- Create Assignment) */
+    .mobile-sub-header {
+      display: flex !important;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      margin-top: 12px;
+    }
+    
+    /* Search and Filter row for Assignments Page */
+    .mobile-search-row {
+      flex-direction: row !important;
+      gap: 12px !important;
+      align-items: center !important;
+    }
+    .mobile-search-row > div:first-child {
+      flex: 0 0 100px;
+    }
+
+    /* Paper output container mobile padding */
+    .mobile-paper-container {
+      padding: 24px 16px !important;
+      border-radius: 16px !important;
+    }
+    
+    /* Bottom buttons row */
+    .mobile-footer-buttons {
+      justify-content: center !important;
+      gap: 16px !important;
+      padding-bottom: 20px !important;
+    }
+    
+    /* Hide certain desktop elements */
+    .desktop-only { display: none !important; }
   }
 }
 

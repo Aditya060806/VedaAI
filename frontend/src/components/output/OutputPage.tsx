@@ -83,6 +83,7 @@ export default function OutputPage({ paper }: { paper: QuestionPaper }) {
       {/* ── Printable Question Paper ── */}
       <div
         id="question-paper-print"
+        className="mobile-paper-container"
         style={{
           background: '#ffffff',
           border: '1px solid #e4e4e7',
